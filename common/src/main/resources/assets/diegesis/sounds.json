@@ -1,0 +1,14 @@
+{
+  "station.pick_up": {"sounds": [{"name": "minecraft:item.bundle.remove_one", "type": "event", "volume": 0.7}]},
+  "station.put_down": {"sounds": [{"name": "minecraft:item.bundle.insert", "type": "event", "volume": 0.8}]},
+  "station.grab": {"sounds": [{"name": "minecraft:item.armor.equip_generic", "type": "event", "volume": 0.5}]},
+  "station.set_down": {"sounds": [{"name": "minecraft:block.wood.place", "type": "event", "volume": 0.5}]},
+  "station.toggle": {"sounds": [{"name": "minecraft:block.lever.click", "type": "event", "volume": 0.6}]},
+  "station.button": {"sounds": [{"name": "minecraft:block.stone_button.click_on", "type": "event", "volume": 0.6}]},
+  "station.detent": {"sounds": [{"name": "minecraft:block.wooden_button.click_off", "type": "event", "volume": 0.3}]},
+  "station.pour": {"sounds": [{"name": "minecraft:item.bottle.fill", "type": "event", "volume": 0.6}]},
+  "station.slosh": {"sounds": [{"name": "minecraft:entity.generic.swim", "type": "event", "volume": 0.25}]},
+  "station.bubble": {"sounds": [{"name": "minecraft:block.bubble_column.bubble_pop", "type": "event", "volume": 0.5}]},
+  "station.spark": {"sounds": [{"name": "minecraft:block.fire.extinguish", "type": "event", "volume": 0.15}]},
+  "station.steam": {"sounds": [{"name": "minecraft:block.fire.extinguish", "type": "event", "volume": 0.2}]}
+}

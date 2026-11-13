@@ -1,0 +1,1 @@
+ddfdc9a0c8868167e4646e1752501ebfabe13accd36cf666a116e6deed289e1e  diegesis-fabric-26.3-1.0.0-beta.4+26.3.port.1.jar

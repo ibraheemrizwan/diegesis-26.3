@@ -1,0 +1,130 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/iron_block",
+    "iron_block": "minecraft:block/iron_block",
+    "red_concrete": "minecraft:block/red_concrete"
+  },
+  "elements": [
+    {
+      "name": "move_off",
+      "from": [
+        6,
+        1,
+        5
+      ],
+      "to": [
+        10,
+        4,
+        8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            12,
+            10,
+            15
+          ],
+          "texture": "#iron_block"
+        },
+        "east": {
+          "uv": [
+            8,
+            12,
+            11,
+            15
+          ],
+          "texture": "#iron_block"
+        },
+        "west": {
+          "uv": [
+            5,
+            12,
+            8,
+            15
+          ],
+          "texture": "#iron_block"
+        },
+        "up": {
+          "uv": [
+            6,
+            5,
+            10,
+            8
+          ],
+          "texture": "#iron_block"
+        },
+        "down": {
+          "uv": [
+            6,
+            8,
+            10,
+            11
+          ],
+          "texture": "#iron_block"
+        }
+      }
+    },
+    {
+      "name": "move_on",
+      "from": [
+        6,
+        1,
+        8
+      ],
+      "to": [
+        10,
+        4,
+        11
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            5,
+            12,
+            8,
+            15
+          ],
+          "texture": "#red_concrete"
+        },
+        "south": {
+          "uv": [
+            6,
+            12,
+            10,
+            15
+          ],
+          "texture": "#red_concrete"
+        },
+        "west": {
+          "uv": [
+            8,
+            12,
+            11,
+            15
+          ],
+          "texture": "#red_concrete"
+        },
+        "up": {
+          "uv": [
+            6,
+            8,
+            10,
+            11
+          ],
+          "texture": "#red_concrete"
+        },
+        "down": {
+          "uv": [
+            6,
+            5,
+            10,
+            8
+          ],
+          "texture": "#red_concrete"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,283 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/anvil",
+    "anvil": "minecraft:block/anvil"
+  },
+  "elements": [
+    {
+      "name": "base_housing",
+      "from": [
+        5,
+        0,
+        4
+      ],
+      "to": [
+        11,
+        2,
+        12
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            5,
+            14,
+            11,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "east": {
+          "uv": [
+            4,
+            14,
+            12,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "south": {
+          "uv": [
+            5,
+            14,
+            11,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "west": {
+          "uv": [
+            4,
+            14,
+            12,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "up": {
+          "uv": [
+            5,
+            4,
+            11,
+            12
+          ],
+          "texture": "#anvil"
+        },
+        "down": {
+          "uv": [
+            5,
+            4,
+            11,
+            12
+          ],
+          "texture": "#anvil",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "name": "base_bezel_n",
+      "from": [
+        5,
+        2,
+        4
+      ],
+      "to": [
+        11,
+        3,
+        5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            5,
+            13,
+            11,
+            14
+          ],
+          "texture": "#anvil"
+        },
+        "east": {
+          "uv": [
+            11,
+            13,
+            12,
+            14
+          ],
+          "texture": "#anvil"
+        },
+        "south": {
+          "uv": [
+            5,
+            13,
+            11,
+            14
+          ],
+          "texture": "#anvil"
+        },
+        "west": {
+          "uv": [
+            4,
+            13,
+            5,
+            14
+          ],
+          "texture": "#anvil"
+        },
+        "up": {
+          "uv": [
+            5,
+            4,
+            11,
+            5
+          ],
+          "texture": "#anvil"
+        }
+      }
+    },
+    {
+      "name": "base_bezel_s",
+      "from": [
+        5,
+        2,
+        11
+      ],
+      "to": [
+        11,
+        3,
+        12
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            5,
+            13,
+            11,
+            14
+          ],
+          "texture": "#anvil"
+        },
+        "east": {
+          "uv": [
+            4,
+            13,
+            5,
+            14
+          ],
+          "texture": "#anvil"
+        },
+        "south": {
+          "uv": [
+            5,
+            13,
+            11,
+            14
+          ],
+          "texture": "#anvil"
+        },
+        "west": {
+          "uv": [
+            11,
+            13,
+            12,
+            14
+          ],
+          "texture": "#anvil"
+        },
+        "up": {
+          "uv": [
+            5,
+            11,
+            11,
+            12
+          ],
+          "texture": "#anvil"
+        }
+      }
+    },
+    {
+      "name": "base_bezel_w",
+      "from": [
+        5,
+        2,
+        5
+      ],
+      "to": [
+        6,
+        3,
+        11
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            5,
+            13,
+            11,
+            14
+          ],
+          "texture": "#anvil"
+        },
+        "west": {
+          "uv": [
+            5,
+            13,
+            11,
+            14
+          ],
+          "texture": "#anvil"
+        },
+        "up": {
+          "uv": [
+            5,
+            5,
+            6,
+            11
+          ],
+          "texture": "#anvil"
+        }
+      }
+    },
+    {
+      "name": "base_bezel_e",
+      "from": [
+        10,
+        2,
+        5
+      ],
+      "to": [
+        11,
+        3,
+        11
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            5,
+            13,
+            11,
+            14
+          ],
+          "texture": "#anvil"
+        },
+        "west": {
+          "uv": [
+            5,
+            13,
+            11,
+            14
+          ],
+          "texture": "#anvil"
+        },
+        "up": {
+          "uv": [
+            10,
+            5,
+            11,
+            11
+          ],
+          "texture": "#anvil"
+        }
+      }
+    }
+  ]
+}

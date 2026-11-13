@@ -1,0 +1,9 @@
+{
+  "visual": {"model": "diegesis:diegesis/control/button"},
+  "control": {
+    "type": "button",
+    "axis": [0, -1, 0],
+    "range": [0, 0.8],
+    "base": {"model": "diegesis:diegesis/control/button_base"}
+  }
+}

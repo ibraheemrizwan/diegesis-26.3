@@ -1,0 +1,4898 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/Pocky-l/diegesis/main/docs/schema/scene.schema.json",
+  "title": "Diegesis scene",
+  "description": "A Diegesis scene: what a station shows and lets the player touch. File: assets/<namespace>/diegesis/scenes/<path>.json. Coordinates are Blockbench pixels (16 = one block) relative to the block's corner, for a block facing north (its front on the -Z side); the library turns the scene with the block.",
+  "allOf": [
+    {
+      "$ref": "#/definitions/scene"
+    }
+  ],
+  "definitions": {
+    "vec3": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3,
+      "description": "[x, y, z] in Blockbench pixels (16 = one block)."
+    },
+    "xz": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "[x, z] in scene pixels."
+    },
+    "color": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$"
+        },
+        {
+          "type": "integer"
+        }
+      ],
+      "description": "\"#RRGGBB\", \"#AARRGGBB\" or an ARGB integer."
+    },
+    "resource_location": {
+      "type": "string",
+      "pattern": "^([a-z0-9_.-]+:)?[a-z0-9_./-]+$",
+      "description": "A namespaced id, e.g. \"mymod:diegesis/flask\"."
+    },
+    "node_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "Lower case letters, digits and _."
+    },
+    "block_state": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object"
+        }
+      ],
+      "description": "\"minecraft:lever[face=floor]\", or vanilla's {\"Name\": ..., \"Properties\": ...}."
+    },
+    "scene": {
+      "type": "object",
+      "description": "A Diegesis scene: what a station shows and lets the player touch. File: assets/<namespace>/diegesis/scenes/<path>.json. Coordinates are Blockbench pixels (16 = one block) relative to the block's corner, for a block facing north (its front on the -Z side); the library turns the scene with the block.",
+      "properties": {
+        "camera": {
+          "$ref": "#/definitions/camera",
+          "description": "Where the camera goes while the player works here."
+        },
+        "work_plane": {
+          "type": "number",
+          "description": "Height (pixels) of the surface carried objects and the held stack move over, usually the table top.",
+          "default": 16
+        },
+        "idle_visible": {
+          "type": "boolean",
+          "description": "Draw the nodes while nobody works at the block (needs a block entity).",
+          "default": true
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/node"
+          },
+          "description": "The top-level nodes."
+        },
+        "inventory": {
+          "$ref": "#/definitions/inventory",
+          "description": "Lays the player's 36 inventory slots out in the scene instead of the vanilla panel on the screen."
+        },
+        "interface": {
+          "$ref": "#/definitions/interface",
+          "description": "How the interface behaves and looks."
+        },
+        "carry_planes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/carry_plane"
+          },
+          "description": "Levels carried objects rise to over parts of the scene, or areas closed to them."
+        },
+        "inventory_drawer": {
+          "$ref": "#/definitions/inventory_drawer",
+          "description": "Keeps the inventory in a drawer at a side of the screen; not together with inventory."
+        },
+        "pouring": {
+          "$ref": "#/definitions/pouring",
+          "description": "How pouring looks."
+        },
+        "captions": {
+          "$ref": "#/definitions/captions",
+          "description": "How the lines of StationView.showCaption look."
+        },
+        "clear_view": {
+          "$ref": "#/definitions/clear_view",
+          "description": "What stands between the camera and the station dissolves."
+        },
+        "gains": {
+          "$ref": "#/definitions/gains",
+          "description": "What the player gets at the station flies into the inventory."
+        },
+        "put_away": {
+          "type": "boolean",
+          "description": "A right click with a stack on the cursor that nothing in the scene takes puts the stack back into the inventory, to the slot it came from while that is free.",
+          "default": true
+        },
+        "placing": {
+          "$ref": "#/definitions/placing",
+          "description": "Lets items be put down anywhere on the scene's surfaces, turned and sized freely."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "camera": {
+      "type": "object",
+      "description": "The camera rig used while a player works at the station.",
+      "properties": {
+        "position": {
+          "$ref": "#/definitions/vec3",
+          "description": "Camera position, scene pixels.",
+          "default": [
+            8,
+            36,
+            -12
+          ]
+        },
+        "target": {
+          "$ref": "#/definitions/vec3",
+          "description": "The point the camera looks at, scene pixels.",
+          "default": [
+            8,
+            16,
+            7
+          ]
+        },
+        "fov": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 170,
+          "description": "Vertical field of view in degrees while focused; 0 keeps the player's setting.",
+          "default": 0
+        },
+        "transition": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Seconds the camera takes to fly in and out.",
+          "default": 0.6
+        },
+        "inventory": {
+          "$ref": "#/definitions/camera_shot",
+          "description": "A second shot the camera glides to while the scene's inventory is shown, and back when it hides."
+        },
+        "seats": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/camera_shot"
+          },
+          "description": "The view from each seat of the station, by seat id: a player in a seat sees that shot. Who has no seat, or a seat without a shot, sees the rig's own."
+        },
+        "glances": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/camera_glance"
+          },
+          "description": "Other places the player's look can go to: the cursor resting at an edge of the screen, or code, glides the camera there and back."
+        },
+        "neighbors": {
+          "$ref": "#/definitions/camera_neighbors",
+          "description": "Going over to a station standing next to this one: the cursor resting at the edge of the screen on its side flies the camera there."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "gains": {
+      "type": "object",
+      "description": "What the player gets at the station, seen going into the inventory; every field is optional.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "A stack that comes into the inventory, other than from the player's own cursor, flies from the station to its slot, which bounces as it lands.",
+          "default": true
+        },
+        "time": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 3,
+          "description": "Seconds a stack flies.",
+          "default": 0.45
+        },
+        "hold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Seconds a stack whose slot the drawer does not show stands next to the drawer.",
+          "default": 1.6
+        },
+        "sound": {
+          "type": "boolean",
+          "description": "A soft pop as it lands.",
+          "default": true
+        },
+        "count": {
+          "type": "boolean",
+          "description": "\"+N\" shows how many came: rising from the slot, or beside the stack by the drawer.",
+          "default": true
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "camera_neighbors": {
+      "type": "object",
+      "description": "Going over to neighbouring stations without leaving; every field is optional.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Neighbours are reachable from this station, and this station from theirs.",
+          "default": true
+        },
+        "range": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8,
+          "description": "How far another station may stand, blocks along the floor; one up or down counts too.",
+          "default": 3
+        },
+        "zone": {
+          "type": "number",
+          "minimum": 0.005,
+          "maximum": 0.3,
+          "description": "How far from the edge the cursor counts as being at it, as a part of the screen.",
+          "default": 0.03
+        },
+        "delay": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Seconds the cursor must rest there, so that passing by moves nothing.",
+          "default": 0.3
+        },
+        "time": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 5,
+          "description": "Seconds the camera takes to fly over.",
+          "default": 0.65
+        },
+        "hint": {
+          "type": "boolean",
+          "description": "Draw a small arrow at an edge that leads to a neighbour, as the cursor comes near it.",
+          "default": true
+        },
+        "hint_color": {
+          "$ref": "#/definitions/color",
+          "description": "Colour of the arrow; its alpha is the strongest it gets, with the cursor at the edge.",
+          "default": "#D0FFFFFF"
+        },
+        "keys": {
+          "type": "boolean",
+          "description": "The movement and arrow keys go over at once to the neighbour on their side: A, D and left, right; W and up to the top edge, S and down to the bottom one.",
+          "default": true
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "camera_glance": {
+      "type": "object",
+      "description": "A place the player's look can go to while working at the station.",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/node_id",
+          "description": "Unique in the scene; StationView.glance and SceneEvent.Glance use it."
+        },
+        "edge": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right",
+            "top",
+            "bottom"
+          ],
+          "description": "The edge of the screen the cursor rests at to look here; without one only code does. One glance per edge, and not the inventory drawer's."
+        },
+        "zone": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 0.5,
+          "description": "How far from that edge the cursor counts as being at it, as a part of the screen.",
+          "default": 0.1
+        },
+        "delay": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Seconds the cursor must rest there, so that passing by moves nothing.",
+          "default": 0.12
+        },
+        "position": {
+          "$ref": "#/definitions/vec3",
+          "description": "Camera position, scene pixels."
+        },
+        "target": {
+          "$ref": "#/definitions/vec3",
+          "description": "The point the camera looks at, scene pixels."
+        },
+        "fov": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 170,
+          "description": "Field of view in degrees; 0 keeps the rig's.",
+          "default": 0
+        },
+        "time": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Seconds the camera takes to get there and back.",
+          "default": 0.45
+        },
+        "back_on_take": {
+          "type": "boolean",
+          "description": "Look back as soon as a stack comes onto the cursor here.",
+          "default": true
+        },
+        "back_zone": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "description": "The strip along the opposite edge that looks back, as a part of the screen; 0: no strip, only a taken stack or code ends the glance.",
+          "default": 0.12
+        },
+        "hint": {
+          "type": "boolean",
+          "description": "Draw a small arrow at the edge the look can go to or come back from.",
+          "default": true
+        },
+        "hint_color": {
+          "$ref": "#/definitions/color",
+          "description": "Colour of the arrow; its alpha is the strongest it gets, with the cursor at the edge.",
+          "default": "#D0FFFFFF"
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "position",
+        "target"
+      ]
+    },
+    "clear_view": {
+      "type": "object",
+      "description": "Keeps the view of the station free while a player works at it; every field is optional.",
+      "properties": {
+        "entities": {
+          "type": "boolean",
+          "description": "Entities dissolve.",
+          "default": true
+        },
+        "particles": {
+          "type": "boolean",
+          "description": "The world's particles dissolve; the scene's own never do.",
+          "default": true
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 256,
+          "description": "How wide the clear cone is at the station, in pixels.",
+          "default": 16
+        },
+        "soft": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 256,
+          "description": "How far beyond radius things come back to full strength, in pixels.",
+          "default": 12
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "captions": {
+      "type": "object",
+      "description": "How the lines of StationView.showCaption look; every field is optional.",
+      "properties": {
+        "edge": {
+          "enum": [
+            "top",
+            "bottom"
+          ],
+          "description": "The screen edge they sit at.",
+          "default": "top"
+        },
+        "color": {
+          "$ref": "#/definitions/color",
+          "description": "The text's colour.",
+          "default": "#FFFFFFFF"
+        },
+        "background": {
+          "$ref": "#/definitions/color",
+          "description": "The band behind the text; a zero alpha draws none.",
+          "default": "#80000000"
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "placing": {
+      "type": "object",
+      "description": "Free placing: items of a slot group with placed() rules stand anywhere on these surfaces.",
+      "properties": {
+        "group": {
+          "$ref": "#/definitions/node_id",
+          "description": "The slot group that holds the items."
+        },
+        "surfaces": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/place_surface"
+          },
+          "description": "Where they can stand."
+        },
+        "item_size": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 64,
+          "description": "Pixels the longest side of an item measures at size 1.",
+          "default": 6
+        },
+        "turn_step": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 180,
+          "description": "Degrees of one notch of the wheel.",
+          "default": 15
+        },
+        "scale_range": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "The sizes a player can give an item.",
+          "default": [
+            0.5,
+            1.5
+          ]
+        },
+        "scale_step": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 4,
+          "description": "What one notch of the wheel changes the size by.",
+          "default": 0.1
+        },
+        "turn_speed": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 8,
+          "description": "Degrees an item turns per GUI pixel of a drag.",
+          "default": 1.2
+        },
+        "stacking": {
+          "type": "boolean",
+          "description": "Items can stand on each other.",
+          "default": true
+        },
+        "block_models": {
+          "type": "boolean",
+          "description": "A block item with a flat icon stands there as the block.",
+          "default": true
+        },
+        "item_light": {
+          "type": "boolean",
+          "description": "Items of blocks that give light shine on the scene, candles and torches burn.",
+          "default": true
+        },
+        "light_radius": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 256,
+          "description": "How far their light reaches, in pixels.",
+          "default": 11
+        },
+        "light_color": {
+          "$ref": "#/definitions/color",
+          "description": "Colour of the pool of light they throw; alpha is its strength.",
+          "default": "#C0FFC888"
+        },
+        "shadows": {
+          "type": "boolean",
+          "description": "Items cast their shape on what they stand on.",
+          "default": true
+        },
+        "snap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 16,
+          "description": "Positions are rounded to this many pixels; 0 keeps them.",
+          "default": 0.25
+        },
+        "preview_color": {
+          "$ref": "#/definitions/color",
+          "description": "Colour of the see-through copy of the item in the hand.",
+          "default": "#A0FFFFFF"
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "required": [
+        "group",
+        "surfaces"
+      ]
+    },
+    "place_surface": {
+      "type": "object",
+      "description": "A level surface items can stand on.",
+      "properties": {
+        "from": {
+          "$ref": "#/definitions/xz",
+          "description": "One corner, [x, z]."
+        },
+        "to": {
+          "$ref": "#/definitions/xz",
+          "description": "The opposite corner, [x, z]."
+        },
+        "height": {
+          "type": "number",
+          "description": "Its height in scene pixels."
+        },
+        "clearance": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 256,
+          "description": "Room above it, in pixels.",
+          "default": 64
+        },
+        "aim_height": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 256,
+          "description": "0: the cursor points at the surface. Otherwise at a slope up to this height over the back edge.",
+          "default": 0
+        },
+        "wall": {
+          "type": "number",
+          "description": "The z of a wall behind the surface: light in the room falls on it too."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to",
+        "height"
+      ]
+    },
+    "camera_shot": {
+      "type": "object",
+      "description": "Another view of the scene, in the rig's coordinates.",
+      "properties": {
+        "position": {
+          "$ref": "#/definitions/vec3",
+          "description": "Camera position, scene pixels."
+        },
+        "target": {
+          "$ref": "#/definitions/vec3",
+          "description": "The point the camera looks at, scene pixels."
+        },
+        "fov": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 170,
+          "description": "Field of view in degrees; 0 keeps the rig's.",
+          "default": 0
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "required": [
+        "position",
+        "target"
+      ]
+    },
+    "node": {
+      "if": {
+        "type": "object",
+        "required": [
+          "template"
+        ]
+      },
+      "then": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/node_partial"
+          }
+        ],
+        "required": [
+          "id"
+        ]
+      },
+      "else": {
+        "type": "object",
+        "description": "One object of the scene. It has a place, optionally a look, and behaviours. At most one of grabbable, slot, output, control (put others on child nodes). Children move with their parent.",
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/node_id",
+            "description": "Unique in the scene; behaviours and code refer to the node by it."
+          },
+          "template": {
+            "$ref": "#/definitions/resource_location",
+            "description": "A node template, assets/<namespace>/diegesis/nodes/<path>.json, whose fields this node starts from: objects merge field by field, null removes a field. Built-in: diegesis:control/lever, switch, button, knob, slider."
+          },
+          "repeat": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "count",
+              "step"
+            ],
+            "properties": {
+              "count": {
+                "$ref": "#/definitions/vec3"
+              },
+              "step": {
+                "$ref": "#/definitions/vec3"
+              }
+            },
+            "description": "The node once per cell of a grid: count [x, y, z] cells, each step [x, y, z] pixels further on, ids <id>_0, <id>_1... (x counts fastest; children get the same ending)."
+          },
+          "pos": {
+            "$ref": "#/definitions/vec3",
+            "description": "Position relative to the parent (or the block corner), pixels.",
+            "default": [
+              0,
+              0,
+              0
+            ]
+          },
+          "rotation": {
+            "$ref": "#/definitions/vec3",
+            "description": "Euler degrees, applied y (yaw), then x (pitch), then z (roll).",
+            "default": [
+              0,
+              0,
+              0
+            ]
+          },
+          "scale": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "$ref": "#/definitions/vec3"
+              }
+            ],
+            "description": "A factor: one number, or one per axis.",
+            "default": 1
+          },
+          "visual": {
+            "$ref": "#/definitions/visual",
+            "description": "What is drawn; without one the node is an invisible pivot or hit zone."
+          },
+          "collider": {
+            "$ref": "#/definitions/box",
+            "description": "What the cursor can hit, in the node's own pixels; derived from the visual (or the role) when absent. Give plane-made vanilla blocks (torches, plants) an explicit one."
+          },
+          "strokes": {
+            "type": "boolean",
+            "description": "A press on the node starts a stroke: SceneEvent.Stroke every frame until the button is let go. Role-less nodes only.",
+            "default": false
+          },
+          "precise": {
+            "type": "boolean",
+            "description": "A mesh visual is hit only where its polygons are, not anywhere in the collider.",
+            "default": false
+          },
+          "trigger": {
+            "type": "boolean",
+            "description": "The collider is only a zone carried objects touch (SceneEvent.Contact); the cursor passes through it.",
+            "default": false
+          },
+          "pickable": {
+            "type": "boolean",
+            "description": "false: pure decoration without a hit box; the cursor and carried objects pass through it (a needle, a part drawn on a grabbable parent).",
+            "default": true
+          },
+          "tooltip": {
+            "type": "string",
+            "description": "Text next to the cursor while it is over the node: a translation key (shown as written when no language has it). Code can change it (NodeView.setTooltip)."
+          },
+          "grabbable": {
+            "$ref": "#/definitions/grabbable",
+            "description": "The player can pick the node up and carry it."
+          },
+          "slot": {
+            "$ref": "#/definitions/slot",
+            "description": "The node is a place for the item of a station slot."
+          },
+          "drop_zone": {
+            "type": "string",
+            "description": "A slot group: a stack clicked or let go here goes into that group. The cursor passes through while nothing fits."
+          },
+          "output": {
+            "$ref": "#/definitions/output",
+            "description": "The node shows a station output; clicking takes it."
+          },
+          "control": {
+            "$ref": "#/definitions/control",
+            "description": "The node is a button, toggle, knob or slider driving a station control."
+          },
+          "tank": {
+            "$ref": "#/definitions/tank",
+            "description": "Shows a station tank as liquid inside the node; with a spout the node pours. Combines with any role."
+          },
+          "emitter": {
+            "$ref": "#/definitions/emitter",
+            "description": "Gives off scene particles."
+          },
+          "light": {
+            "$ref": "#/definitions/light",
+            "description": "Shines on the objects around it and lights the work surface."
+          },
+          "hidden": {
+            "type": "boolean",
+            "description": "Starts invisible; code can show it (NodeView.setVisible).",
+            "default": false
+          },
+          "extra": {
+            "type": "object",
+            "description": "Free-form data for the mod's own code (NodeView.extra())."
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/node"
+            },
+            "description": "Nodes attached to this one."
+          }
+        },
+        "patternProperties": {
+          "^\\$": {}
+        },
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ],
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "grabbable",
+                "slot"
+              ]
+            },
+            {
+              "required": [
+                "grabbable",
+                "output"
+              ]
+            },
+            {
+              "required": [
+                "grabbable",
+                "control"
+              ]
+            },
+            {
+              "required": [
+                "slot",
+                "output"
+              ]
+            },
+            {
+              "required": [
+                "slot",
+                "control"
+              ]
+            },
+            {
+              "required": [
+                "output",
+                "control"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "visual": {
+      "type": "object",
+      "description": "What a node looks like: exactly one of model, mesh, item, block.",
+      "properties": {
+        "mesh": {
+          "$ref": "#/definitions/resource_location",
+          "description": "A polygon model, assets/<namespace>/diegesis/meshes/<path>.obj; one unit is one pixel. Needs texture."
+        },
+        "texture": {
+          "$ref": "#/definitions/resource_location",
+          "description": "The mesh's texture, a sprite of the block atlas: mymod:block/chess/king for assets/mymod/textures/block/chess/king.png, or any vanilla block texture."
+        },
+        "model": {
+          "$ref": "#/definitions/resource_location",
+          "description": "A block model id, e.g. mymod:diegesis/flask for assets/mymod/models/diegesis/flask.json (every model under models/diegesis/ is loaded by itself; others need DiegesisClient.registerModel)."
+        },
+        "item": {
+          "$ref": "#/definitions/resource_location",
+          "description": "An item id, drawn like an item frame shows it."
+        },
+        "block": {
+          "$ref": "#/definitions/block_state",
+          "description": "A block state as in commands: \"minecraft:lever[face=floor,facing=north]\"."
+        },
+        "anchor": {
+          "$ref": "#/definitions/vec3",
+          "description": "The point of the model (its own pixels) that sits on the node's position; the default is the centre of the model's bottom.",
+          "default": [
+            8,
+            0,
+            8
+          ]
+        },
+        "tint": {
+          "$ref": "#/definitions/color",
+          "description": "ARGB colour multiplied into the model; alpha below FF makes it see-through.",
+          "default": "#FFFFFFFF"
+        },
+        "translucent": {
+          "type": "boolean",
+          "description": "The model has see-through textures (glass): drawn after solid parts, sorted.",
+          "default": false
+        },
+        "emissive": {
+          "type": "boolean",
+          "description": "Drawn at full brightness.",
+          "default": false
+        },
+        "double_sided": {
+          "type": "boolean",
+          "description": "Faces are drawn from behind too: the inner walls of an open glass vessel.",
+          "default": false
+        },
+        "glass": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "How clear the faces are where they look straight at the camera: they thicken towards a grazing angle, as glass does. 0 draws the texture as it is. Implies translucent.",
+          "default": 0
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "model"
+          ]
+        },
+        {
+          "required": [
+            "mesh",
+            "texture"
+          ]
+        },
+        {
+          "required": [
+            "item"
+          ]
+        },
+        {
+          "required": [
+            "block"
+          ]
+        }
+      ]
+    },
+    "box": {
+      "type": "object",
+      "description": "An axis-aligned box, pixels.",
+      "properties": {
+        "from": {
+          "$ref": "#/definitions/vec3",
+          "description": "One corner."
+        },
+        "to": {
+          "$ref": "#/definitions/vec3",
+          "description": "The opposite corner."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to"
+      ]
+    },
+    "grabbable": {
+      "type": "object",
+      "description": "An object the player picks up with the cursor and carries.",
+      "properties": {
+        "lift": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64,
+          "description": "How high (pixels) the grip is held above the work surface.",
+          "default": 4
+        },
+        "sway": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4,
+          "description": "How much it leans while moving; 0 keeps it upright.",
+          "default": 1
+        },
+        "stay": {
+          "type": "boolean",
+          "description": "Stays where it is dropped instead of flying back home.",
+          "default": false
+        },
+        "grip": {
+          "$ref": "#/definitions/vec3",
+          "description": "The point it is held by, node pixels (a vial by its top); the middle of its hit box by default."
+        },
+        "plane": {
+          "$ref": "#/definitions/grab_plane",
+          "description": "A plane of its own it moves in instead of the work surface (lift and carry planes then do not apply)."
+        },
+        "contact": {
+          "$ref": "#/definitions/box",
+          "description": "The part that touches other things (a torch's flame), node pixels; the whole hit box when absent."
+        },
+        "hold": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "drag",
+            "click"
+          ],
+          "description": "auto: a quick click leaves it in the hand until the next click, pressing and dragging carries it until the button is let go; drag or click: only that way.",
+          "default": "auto"
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "grab_plane": {
+      "type": "object",
+      "description": "A plane a grabbable moves in; its grip follows the cursor on it.",
+      "properties": {
+        "point": {
+          "$ref": "#/definitions/vec3",
+          "description": "A point of the plane, scene pixels."
+        },
+        "normal": {
+          "$ref": "#/definitions/vec3",
+          "description": "The plane's facing; [0, 0, -1] is an upright wall facing the block's front.",
+          "default": [
+            0,
+            0,
+            -1
+          ]
+        },
+        "bounds": {
+          "$ref": "#/definitions/box",
+          "description": "Where on the plane the grip may go, scene pixels; anywhere when absent."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "required": [
+        "point"
+      ]
+    },
+    "carry_plane": {
+      "type": "object",
+      "description": "With a height: a level carried objects rise to over an area (a vial goes up over a tall flask). Closed: an area objects may not enter (a torch stays outside a burner). Where planes overlap the highest wins.",
+      "properties": {
+        "from": {
+          "$ref": "#/definitions/xz",
+          "description": "One corner of the area, [x, z] scene pixels."
+        },
+        "to": {
+          "$ref": "#/definitions/xz",
+          "description": "The opposite corner."
+        },
+        "height": {
+          "type": "number",
+          "description": "Height (scene pixels) of the object's grip over the area."
+        },
+        "blend": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64,
+          "description": "Pixels round the area over which objects climb to it (or stay away from a closed one).",
+          "default": 4
+        },
+        "closed": {
+          "type": "boolean",
+          "description": "Objects may not enter the area.",
+          "default": false
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/node_id"
+          },
+          "description": "The grabbable nodes it applies to; all when empty."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to"
+      ]
+    },
+    "slot": {
+      "type": "object",
+      "description": "A place for an item of a station slot; clicked like a vanilla slot.",
+      "properties": {
+        "slot": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+(\\[[0-9]+\\])?$",
+          "description": "The station slot: \"grid[4]\", or \"fuel\" for index 0."
+        },
+        "display": {
+          "type": "string",
+          "enum": [
+            "flat",
+            "upright",
+            "floating",
+            "hidden"
+          ],
+          "description": "flat: lying on the surface; upright: standing, facing the camera side; floating: hovering and turning.",
+          "default": "flat"
+        },
+        "size": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 64,
+          "description": "Size of the slot (drop zone, highlight) in pixels; also of the item without item_size.",
+          "default": 6
+        },
+        "item_size": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 64,
+          "description": "Size of the shown item, when it differs from the slot's."
+        },
+        "counts": {
+          "type": "string",
+          "enum": [
+            "always",
+            "hover",
+            "never"
+          ],
+          "description": "When the stack's count is drawn; hover keeps slots close together readable.",
+          "default": "always"
+        },
+        "highlight": {
+          "type": "boolean",
+          "description": "The square over the slot under the cursor; off for things that are no slots to the eye.",
+          "default": true
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "required": [
+        "slot"
+      ]
+    },
+    "output": {
+      "type": "object",
+      "description": "Shows a result the station logic computes; clicking takes it.",
+      "properties": {
+        "output": {
+          "type": "string",
+          "description": "The station output's name."
+        },
+        "display": {
+          "type": "string",
+          "enum": [
+            "flat",
+            "upright",
+            "floating",
+            "hidden"
+          ],
+          "description": "How the result is shown.",
+          "default": "floating"
+        },
+        "size": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 64,
+          "description": "Size of the item and of the click zone, pixels.",
+          "default": 8
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "required": [
+        "output"
+      ]
+    },
+    "control": {
+      "type": "object",
+      "description": "A control the player operates with the mouse. Knob/toggle turn round axis from range[0] to range[1] degrees; slider/button move along axis by that many pixels. Axis, range and pivot are in the node's own space.",
+      "properties": {
+        "control": {
+          "type": "string",
+          "description": "The station control (declared in the schema)."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "button",
+            "toggle",
+            "knob",
+            "slider"
+          ],
+          "description": "button: click, springs back; toggle: click flips 0/1; knob: turned; slider: dragged."
+        },
+        "axis": {
+          "$ref": "#/definitions/vec3",
+          "description": "Turn axis or travel direction. Defaults: button [0,-1,0], toggle [1,0,0], knob [0,1,0], slider [1,0,0]."
+        },
+        "range": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Movement at the minimum and maximum value. Defaults: button [0,1], toggle [-25,25], knob [135,-135], slider [0,8]."
+        },
+        "circular": {
+          "type": "boolean",
+          "description": "A knob is grabbed anywhere and turned by circling the mouse round it; false turns it by dragging up or right.",
+          "default": true
+        },
+        "pivot": {
+          "$ref": "#/definitions/vec3",
+          "description": "The point a knob or toggle turns round, node pixels (a lever's hinge).",
+          "default": [
+            0,
+            0,
+            0
+          ]
+        },
+        "base": {
+          "$ref": "#/definitions/visual",
+          "description": "What stays still while the node moves (a lever's plate, a slider's track); drawn where the node rests, not clickable."
+        },
+        "smoothing": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Seconds the node takes to cover half the way to a new value; larger glides (a gauge needle on a locked control).",
+          "default": 0.05
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "required": [
+        "control",
+        "type"
+      ]
+    },
+    "tank": {
+      "type": "object",
+      "description": "Shows a station tank as liquid inside the node.",
+      "properties": {
+        "tank": {
+          "type": "string",
+          "description": "The station tank's name."
+        },
+        "inner": {
+          "$ref": "#/definitions/box",
+          "description": "The space the liquid fills, node pixels."
+        },
+        "round": {
+          "type": "boolean",
+          "description": "The liquid is a cylinder standing in inner instead of a box.",
+          "default": false
+        },
+        "spout": {
+          "$ref": "#/definitions/vec3",
+          "description": "Where liquid leaves when poured, node pixels; without one the node only receives."
+        },
+        "pour_range": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 64,
+          "description": "How far (pixels) round another tank the cursor still counts as pointing at it.",
+          "default": 2.5
+        },
+        "pour_angle": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 135,
+          "description": "How far (degrees) the node tips at most; it stops earlier once the liquid reaches the spout.",
+          "default": 100
+        },
+        "opening": {
+          "$ref": "#/definitions/vec3",
+          "description": "Where poured liquid goes in, node pixels; the middle of inner's top when absent."
+        },
+        "pour_height": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 32,
+          "description": "How high (pixels) over the other tank's opening the spout is held.",
+          "default": 3
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "required": [
+        "tank",
+        "inner"
+      ]
+    },
+    "emitter": {
+      "type": "object",
+      "description": "Gives off scene particles; code can switch it (NodeView.setEmitting).",
+      "properties": {
+        "particle": {
+          "$ref": "#/definitions/resource_location",
+          "description": "A particle style: diegesis:spark, bubble, droplet, splash, steam, smoke, glint, dust, flame, or one registered with DiegesisClient.registerParticle."
+        },
+        "rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 200,
+          "description": "Particles per second.",
+          "default": 4
+        },
+        "offset": {
+          "$ref": "#/definitions/vec3",
+          "description": "Where they start, node pixels.",
+          "default": [
+            0,
+            0,
+            0
+          ]
+        },
+        "velocity": {
+          "$ref": "#/definitions/vec3",
+          "description": "Start velocity, pixels per second; turns with the node.",
+          "default": [
+            0,
+            0,
+            0
+          ]
+        },
+        "spread": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64,
+          "description": "Random spread of the start position, pixels.",
+          "default": 0.5
+        },
+        "color": {
+          "$ref": "#/definitions/color",
+          "description": "ARGB tint; the style's own colour when absent."
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Emits from the start.",
+          "default": true
+        },
+        "scale": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 20,
+          "description": "Size factor over the style's size.",
+          "default": 1
+        },
+        "in_liquid": {
+          "type": "boolean",
+          "description": "Start anywhere in the node's liquid and end at its surface (bubbles); offset and spread are then unused.",
+          "default": false
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "required": [
+        "particle"
+      ]
+    },
+    "light": {
+      "type": "object",
+      "description": "The node shines on the scene (also while carried).",
+      "properties": {
+        "level": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15,
+          "description": "Brightness like a block's light.",
+          "default": 14
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 256,
+          "description": "How far it reaches, pixels.",
+          "default": 16
+        },
+        "color": {
+          "$ref": "#/definitions/color",
+          "description": "ARGB colour of the light pool on the surface; alpha is its strength, 0 draws none.",
+          "default": "#80FFD9A0"
+        },
+        "flicker": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "How much it wavers: 0 a steady lamp, 1 a wild flame.",
+          "default": 0.12
+        },
+        "offset": {
+          "$ref": "#/definitions/vec3",
+          "description": "Where the light comes from, node pixels (the middle of a long lamp).",
+          "default": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "inventory": {
+      "type": "object",
+      "description": "The player's 36 slots laid out in the scene, vanilla order: hotbar the row nearest the player, slots 9-17 the farthest; column 0 on the player's left.",
+      "properties": {
+        "pos": {
+          "$ref": "#/definitions/vec3",
+          "description": "Centre of the slot grid, scene pixels."
+        },
+        "rotation": {
+          "$ref": "#/definitions/vec3",
+          "description": "The grid's turn in degrees (y, x, z); flat without one.",
+          "default": [
+            0,
+            0,
+            0
+          ]
+        },
+        "spacing": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 32,
+          "description": "Pixels between slot centres.",
+          "default": 2.6
+        },
+        "size": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 32,
+          "description": "Size of the items, pixels.",
+          "default": 2.1
+        },
+        "surface": {
+          "$ref": "#/definitions/block_state",
+          "description": "A block drawn as a board under the slots; without one they float."
+        },
+        "slot_color": {
+          "$ref": "#/definitions/color",
+          "description": "ARGB colour of each slot's square; alpha 0 hides them.",
+          "default": "#66000000"
+        },
+        "show": {
+          "type": "string",
+          "enum": [
+            "always",
+            "toggle"
+          ],
+          "description": "toggle: hidden until Tab (Tab hides again), shown while an item is on the cursor.",
+          "default": "always"
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "required": [
+        "pos"
+      ]
+    },
+    "inventory_drawer": {
+      "type": "object",
+      "description": "The inventory in a drawer at a side of the screen: an icon sits there, pointing at the side slides the inventory out over the scene, and while it is out it comes first. Every field is optional.",
+      "properties": {
+        "side": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right",
+            "top",
+            "bottom"
+          ],
+          "description": "The side of the screen.",
+          "default": "right"
+        },
+        "align": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Where along that side it sits: 0 at the start (left or top), 1 at the end.",
+          "default": 0.5
+        },
+        "icon": {
+          "$ref": "#/definitions/resource_location",
+          "description": "The item drawn on the icon.",
+          "default": "minecraft:bundle"
+        },
+        "icon_texture": {
+          "$ref": "#/definitions/resource_location",
+          "description": "A 16x16 texture drawn on the icon instead, e.g. mymod:textures/gui/bag.png."
+        },
+        "hover_zone": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64,
+          "description": "How wide (GUI pixels) the strip along the side is that opens it; 0: only the icon does.",
+          "default": 10
+        },
+        "open_delay": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Seconds the cursor must stay there, so that passing by opens nothing.",
+          "default": 0.08
+        },
+        "close_delay": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Seconds it waits after the cursor left.",
+          "default": 0.35
+        },
+        "slide_time": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Seconds it takes to slide.",
+          "default": 0.18
+        },
+        "margin": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 64,
+          "description": "Gap (GUI pixels) between the open drawer and the side of the screen.",
+          "default": 4
+        },
+        "style": {
+          "type": "string",
+          "enum": [
+            "panel",
+            "minimal"
+          ],
+          "description": "panel: the vanilla inventory panel; minimal: dark see-through squares.",
+          "default": "panel"
+        },
+        "background": {
+          "$ref": "#/definitions/color",
+          "description": "Background of the minimal style.",
+          "default": "#C0101216"
+        },
+        "slot_color": {
+          "$ref": "#/definitions/color",
+          "description": "Colour of a slot in the minimal style.",
+          "default": "#66000000"
+        },
+        "always_open": {
+          "type": "boolean",
+          "description": "It slides out when the station opens and stays out, without an icon; Escape leaves the station at once.",
+          "default": false
+        },
+        "compact": {
+          "type": "boolean",
+          "description": "Only the stacks the station can use (StationView.setInventoryFilter), in rows of up to nine, the drawer no bigger than they are.",
+          "default": false
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "pouring": {
+      "type": "object",
+      "description": "How pouring looks; every field is optional.",
+      "properties": {
+        "hints": {
+          "type": "boolean",
+          "description": "While a vessel with liquid is in the hand, tanks that would take it are marked at their openings.",
+          "default": true
+        },
+        "hint_color": {
+          "$ref": "#/definitions/color",
+          "description": "Colour of those marks.",
+          "default": "#40FFFFFF"
+        },
+        "meter": {
+          "type": "boolean",
+          "description": "A small bar next to the cursor shows how full the tank being poured into is.",
+          "default": true
+        },
+        "stream": {
+          "type": "boolean",
+          "description": "The liquid runs in a continuous stream; false leaves only drops.",
+          "default": true
+        },
+        "stream_width": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 8,
+          "description": "How wide (pixels) the stream leaves the spout at full flow.",
+          "default": 1.4
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "interface": {
+      "type": "object",
+      "description": "How the interface behaves and looks; every field is optional.",
+      "properties": {
+        "hide_hud": {
+          "type": "boolean",
+          "description": "Hide the HUD (hotbar, health, crosshair).",
+          "default": true
+        },
+        "hide_chat": {
+          "type": "boolean",
+          "description": "Hide the chat.",
+          "default": true
+        },
+        "hide_player": {
+          "type": "boolean",
+          "description": "Do not draw the local player's own body (others still see it).",
+          "default": false
+        },
+        "inventory_panel": {
+          "type": "boolean",
+          "description": "Without an inventory layout, show the vanilla inventory panel (stations with items); false shows no inventory.",
+          "default": true
+        },
+        "show_counts": {
+          "type": "boolean",
+          "description": "Write stack counts next to items in the scene.",
+          "default": true
+        },
+        "counts_on_top": {
+          "type": "boolean",
+          "description": "Draw counts over everything.",
+          "default": true
+        },
+        "highlight_color": {
+          "$ref": "#/definitions/color",
+          "description": "ARGB colour over the slot under the cursor.",
+          "default": "#4DFFFFFF"
+        },
+        "shadows": {
+          "type": "boolean",
+          "description": "Carried things cast a shadow of their shape.",
+          "default": true
+        },
+        "shadow_opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "How dark those shadows are.",
+          "default": 0.5
+        },
+        "carry_lift": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 32,
+          "description": "How high (pixels) the held stack floats over the work surface.",
+          "default": 2.5
+        },
+        "carry_stick": {
+          "type": "boolean",
+          "description": "The held stack settles onto the slot under the cursor.",
+          "default": false
+        },
+        "carry_sway": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4,
+          "description": "How much the held stack leans as it moves.",
+          "default": 1
+        },
+        "carry_margin": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 256,
+          "description": "How far (pixels) beyond the block's sides carried things may go; no limit when absent."
+        },
+        "sounds": {
+          "type": "boolean",
+          "description": "The library's quiet sounds for picking up, putting down and controls.",
+          "default": true
+        },
+        "hover_outline": {
+          "type": "boolean",
+          "description": "Outline the usable object under the cursor.",
+          "default": true
+        },
+        "outline_color": {
+          "$ref": "#/definitions/color",
+          "description": "Colour of that outline.",
+          "default": "#FFE6E6E6"
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "camera_partial": {
+      "type": "object",
+      "description": "The camera rig used while a player works at the station.",
+      "properties": {
+        "position": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "Camera position, scene pixels.",
+              "default": [
+                8,
+                36,
+                -12
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Camera position, scene pixels."
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "The point the camera looks at, scene pixels.",
+              "default": [
+                8,
+                16,
+                7
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The point the camera looks at, scene pixels."
+        },
+        "fov": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 170,
+              "description": "Vertical field of view in degrees while focused; 0 keeps the player's setting.",
+              "default": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Vertical field of view in degrees while focused; 0 keeps the player's setting."
+        },
+        "transition": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "description": "Seconds the camera takes to fly in and out.",
+              "default": 0.6
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Seconds the camera takes to fly in and out."
+        },
+        "inventory": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/camera_shot_partial",
+              "description": "A second shot the camera glides to while the scene's inventory is shown, and back when it hides."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A second shot the camera glides to while the scene's inventory is shown, and back when it hides."
+        },
+        "seats": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/definitions/camera_shot_partial"
+              },
+              "description": "The view from each seat of the station, by seat id: a player in a seat sees that shot. Who has no seat, or a seat without a shot, sees the rig's own."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The view from each seat of the station, by seat id: a player in a seat sees that shot. Who has no seat, or a seat without a shot, sees the rig's own."
+        },
+        "glances": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/camera_glance_partial"
+              },
+              "description": "Other places the player's look can go to: the cursor resting at an edge of the screen, or code, glides the camera there and back."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Other places the player's look can go to: the cursor resting at an edge of the screen, or code, glides the camera there and back."
+        },
+        "neighbors": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/camera_neighbors_partial",
+              "description": "Going over to a station standing next to this one: the cursor resting at the edge of the screen on its side flies the camera there."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Going over to a station standing next to this one: the cursor resting at the edge of the screen on its side flies the camera there."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "gains_partial": {
+      "type": "object",
+      "description": "What the player gets at the station, seen going into the inventory; every field is optional.",
+      "properties": {
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "A stack that comes into the inventory, other than from the player's own cursor, flies from the station to its slot, which bounces as it lands.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A stack that comes into the inventory, other than from the player's own cursor, flies from the station to its slot, which bounces as it lands."
+        },
+        "time": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.05,
+              "maximum": 3,
+              "description": "Seconds a stack flies.",
+              "default": 0.45
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Seconds a stack flies."
+        },
+        "hold": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "description": "Seconds a stack whose slot the drawer does not show stands next to the drawer.",
+              "default": 1.6
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Seconds a stack whose slot the drawer does not show stands next to the drawer."
+        },
+        "sound": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "A soft pop as it lands.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A soft pop as it lands."
+        },
+        "count": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "\"+N\" shows how many came: rising from the slot, or beside the stack by the drawer.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "\"+N\" shows how many came: rising from the slot, or beside the stack by the drawer."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "camera_neighbors_partial": {
+      "type": "object",
+      "description": "Going over to neighbouring stations without leaving; every field is optional.",
+      "properties": {
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Neighbours are reachable from this station, and this station from theirs.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Neighbours are reachable from this station, and this station from theirs."
+        },
+        "range": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8,
+              "description": "How far another station may stand, blocks along the floor; one up or down counts too.",
+              "default": 3
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How far another station may stand, blocks along the floor; one up or down counts too."
+        },
+        "zone": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.005,
+              "maximum": 0.3,
+              "description": "How far from the edge the cursor counts as being at it, as a part of the screen.",
+              "default": 0.03
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How far from the edge the cursor counts as being at it, as a part of the screen."
+        },
+        "delay": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2,
+              "description": "Seconds the cursor must rest there, so that passing by moves nothing.",
+              "default": 0.3
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Seconds the cursor must rest there, so that passing by moves nothing."
+        },
+        "time": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.05,
+              "maximum": 5,
+              "description": "Seconds the camera takes to fly over.",
+              "default": 0.65
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Seconds the camera takes to fly over."
+        },
+        "hint": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Draw a small arrow at an edge that leads to a neighbour, as the cursor comes near it.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Draw a small arrow at an edge that leads to a neighbour, as the cursor comes near it."
+        },
+        "hint_color": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "Colour of the arrow; its alpha is the strongest it gets, with the cursor at the edge.",
+              "default": "#D0FFFFFF"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Colour of the arrow; its alpha is the strongest it gets, with the cursor at the edge."
+        },
+        "keys": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "The movement and arrow keys go over at once to the neighbour on their side: A, D and left, right; W and up to the top edge, S and down to the bottom one.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The movement and arrow keys go over at once to the neighbour on their side: A, D and left, right; W and up to the top edge, S and down to the bottom one."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "camera_glance_partial": {
+      "type": "object",
+      "description": "A place the player's look can go to while working at the station.",
+      "properties": {
+        "id": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/node_id",
+              "description": "Unique in the scene; StationView.glance and SceneEvent.Glance use it."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Unique in the scene; StationView.glance and SceneEvent.Glance use it."
+        },
+        "edge": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "left",
+                "right",
+                "top",
+                "bottom"
+              ],
+              "description": "The edge of the screen the cursor rests at to look here; without one only code does. One glance per edge, and not the inventory drawer's."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The edge of the screen the cursor rests at to look here; without one only code does. One glance per edge, and not the inventory drawer's."
+        },
+        "zone": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.5,
+              "description": "How far from that edge the cursor counts as being at it, as a part of the screen.",
+              "default": 0.1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How far from that edge the cursor counts as being at it, as a part of the screen."
+        },
+        "delay": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2,
+              "description": "Seconds the cursor must rest there, so that passing by moves nothing.",
+              "default": 0.12
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Seconds the cursor must rest there, so that passing by moves nothing."
+        },
+        "position": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "Camera position, scene pixels."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Camera position, scene pixels."
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "The point the camera looks at, scene pixels."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The point the camera looks at, scene pixels."
+        },
+        "fov": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 170,
+              "description": "Field of view in degrees; 0 keeps the rig's.",
+              "default": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Field of view in degrees; 0 keeps the rig's."
+        },
+        "time": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "description": "Seconds the camera takes to get there and back.",
+              "default": 0.45
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Seconds the camera takes to get there and back."
+        },
+        "back_on_take": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Look back as soon as a stack comes onto the cursor here.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Look back as soon as a stack comes onto the cursor here."
+        },
+        "back_zone": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.5,
+              "description": "The strip along the opposite edge that looks back, as a part of the screen; 0: no strip, only a taken stack or code ends the glance.",
+              "default": 0.12
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The strip along the opposite edge that looks back, as a part of the screen; 0: no strip, only a taken stack or code ends the glance."
+        },
+        "hint": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Draw a small arrow at the edge the look can go to or come back from.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Draw a small arrow at the edge the look can go to or come back from."
+        },
+        "hint_color": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "Colour of the arrow; its alpha is the strongest it gets, with the cursor at the edge.",
+              "default": "#D0FFFFFF"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Colour of the arrow; its alpha is the strongest it gets, with the cursor at the edge."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "clear_view_partial": {
+      "type": "object",
+      "description": "Keeps the view of the station free while a player works at it; every field is optional.",
+      "properties": {
+        "entities": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Entities dissolve.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Entities dissolve."
+        },
+        "particles": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "The world's particles dissolve; the scene's own never do.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The world's particles dissolve; the scene's own never do."
+        },
+        "radius": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 256,
+              "description": "How wide the clear cone is at the station, in pixels.",
+              "default": 16
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How wide the clear cone is at the station, in pixels."
+        },
+        "soft": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 256,
+              "description": "How far beyond radius things come back to full strength, in pixels.",
+              "default": 12
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How far beyond radius things come back to full strength, in pixels."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "captions_partial": {
+      "type": "object",
+      "description": "How the lines of StationView.showCaption look; every field is optional.",
+      "properties": {
+        "edge": {
+          "anyOf": [
+            {
+              "enum": [
+                "top",
+                "bottom"
+              ],
+              "description": "The screen edge they sit at.",
+              "default": "top"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The screen edge they sit at."
+        },
+        "color": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "The text's colour.",
+              "default": "#FFFFFFFF"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The text's colour."
+        },
+        "background": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "The band behind the text; a zero alpha draws none.",
+              "default": "#80000000"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The band behind the text; a zero alpha draws none."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "placing_partial": {
+      "type": "object",
+      "description": "Free placing: items of a slot group with placed() rules stand anywhere on these surfaces.",
+      "properties": {
+        "group": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/node_id",
+              "description": "The slot group that holds the items."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The slot group that holds the items."
+        },
+        "surfaces": {
+          "anyOf": [
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/definitions/place_surface_partial"
+              },
+              "description": "Where they can stand."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Where they can stand."
+        },
+        "item_size": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 64,
+              "description": "Pixels the longest side of an item measures at size 1.",
+              "default": 6
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Pixels the longest side of an item measures at size 1."
+        },
+        "turn_step": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 180,
+              "description": "Degrees of one notch of the wheel.",
+              "default": 15
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Degrees of one notch of the wheel."
+        },
+        "scale_range": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "The sizes a player can give an item.",
+              "default": [
+                0.5,
+                1.5
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The sizes a player can give an item."
+        },
+        "scale_step": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 4,
+              "description": "What one notch of the wheel changes the size by.",
+              "default": 0.1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "What one notch of the wheel changes the size by."
+        },
+        "turn_speed": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.05,
+              "maximum": 8,
+              "description": "Degrees an item turns per GUI pixel of a drag.",
+              "default": 1.2
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Degrees an item turns per GUI pixel of a drag."
+        },
+        "stacking": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Items can stand on each other.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Items can stand on each other."
+        },
+        "block_models": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "A block item with a flat icon stands there as the block.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A block item with a flat icon stands there as the block."
+        },
+        "item_light": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Items of blocks that give light shine on the scene, candles and torches burn.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Items of blocks that give light shine on the scene, candles and torches burn."
+        },
+        "light_radius": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 256,
+              "description": "How far their light reaches, in pixels.",
+              "default": 11
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How far their light reaches, in pixels."
+        },
+        "light_color": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "Colour of the pool of light they throw; alpha is its strength.",
+              "default": "#C0FFC888"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Colour of the pool of light they throw; alpha is its strength."
+        },
+        "shadows": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Items cast their shape on what they stand on.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Items cast their shape on what they stand on."
+        },
+        "snap": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 16,
+              "description": "Positions are rounded to this many pixels; 0 keeps them.",
+              "default": 0.25
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Positions are rounded to this many pixels; 0 keeps them."
+        },
+        "preview_color": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "Colour of the see-through copy of the item in the hand.",
+              "default": "#A0FFFFFF"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Colour of the see-through copy of the item in the hand."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "place_surface_partial": {
+      "type": "object",
+      "description": "A level surface items can stand on.",
+      "properties": {
+        "from": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/xz",
+              "description": "One corner, [x, z]."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "One corner, [x, z]."
+        },
+        "to": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/xz",
+              "description": "The opposite corner, [x, z]."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The opposite corner, [x, z]."
+        },
+        "height": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Its height in scene pixels."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Its height in scene pixels."
+        },
+        "clearance": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 256,
+              "description": "Room above it, in pixels.",
+              "default": 64
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Room above it, in pixels."
+        },
+        "aim_height": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 256,
+              "description": "0: the cursor points at the surface. Otherwise at a slope up to this height over the back edge.",
+              "default": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "0: the cursor points at the surface. Otherwise at a slope up to this height over the back edge."
+        },
+        "wall": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "The z of a wall behind the surface: light in the room falls on it too."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The z of a wall behind the surface: light in the room falls on it too."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "camera_shot_partial": {
+      "type": "object",
+      "description": "Another view of the scene, in the rig's coordinates.",
+      "properties": {
+        "position": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "Camera position, scene pixels."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Camera position, scene pixels."
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "The point the camera looks at, scene pixels."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The point the camera looks at, scene pixels."
+        },
+        "fov": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 170,
+              "description": "Field of view in degrees; 0 keeps the rig's.",
+              "default": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Field of view in degrees; 0 keeps the rig's."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "node_partial": {
+      "type": "object",
+      "description": "One object of the scene. It has a place, optionally a look, and behaviours. At most one of grabbable, slot, output, control (put others on child nodes). Children move with their parent.",
+      "properties": {
+        "id": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/node_id",
+              "description": "Unique in the scene; behaviours and code refer to the node by it."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Unique in the scene; behaviours and code refer to the node by it."
+        },
+        "template": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/resource_location",
+              "description": "A node template, assets/<namespace>/diegesis/nodes/<path>.json, whose fields this node starts from: objects merge field by field, null removes a field. Built-in: diegesis:control/lever, switch, button, knob, slider."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A node template, assets/<namespace>/diegesis/nodes/<path>.json, whose fields this node starts from: objects merge field by field, null removes a field. Built-in: diegesis:control/lever, switch, button, knob, slider."
+        },
+        "repeat": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "count",
+                "step"
+              ],
+              "properties": {
+                "count": {
+                  "$ref": "#/definitions/vec3"
+                },
+                "step": {
+                  "$ref": "#/definitions/vec3"
+                }
+              },
+              "description": "The node once per cell of a grid: count [x, y, z] cells, each step [x, y, z] pixels further on, ids <id>_0, <id>_1... (x counts fastest; children get the same ending)."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The node once per cell of a grid: count [x, y, z] cells, each step [x, y, z] pixels further on, ids <id>_0, <id>_1... (x counts fastest; children get the same ending)."
+        },
+        "pos": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "Position relative to the parent (or the block corner), pixels.",
+              "default": [
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Position relative to the parent (or the block corner), pixels."
+        },
+        "rotation": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "Euler degrees, applied y (yaw), then x (pitch), then z (roll).",
+              "default": [
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Euler degrees, applied y (yaw), then x (pitch), then z (roll)."
+        },
+        "scale": {
+          "anyOf": [
+            {
+              "oneOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "$ref": "#/definitions/vec3"
+                }
+              ],
+              "description": "A factor: one number, or one per axis.",
+              "default": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A factor: one number, or one per axis."
+        },
+        "visual": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/visual_partial",
+              "description": "What is drawn; without one the node is an invisible pivot or hit zone."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "What is drawn; without one the node is an invisible pivot or hit zone."
+        },
+        "collider": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/box_partial",
+              "description": "What the cursor can hit, in the node's own pixels; derived from the visual (or the role) when absent. Give plane-made vanilla blocks (torches, plants) an explicit one."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "What the cursor can hit, in the node's own pixels; derived from the visual (or the role) when absent. Give plane-made vanilla blocks (torches, plants) an explicit one."
+        },
+        "strokes": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "A press on the node starts a stroke: SceneEvent.Stroke every frame until the button is let go. Role-less nodes only.",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A press on the node starts a stroke: SceneEvent.Stroke every frame until the button is let go. Role-less nodes only."
+        },
+        "precise": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "A mesh visual is hit only where its polygons are, not anywhere in the collider.",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A mesh visual is hit only where its polygons are, not anywhere in the collider."
+        },
+        "trigger": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "The collider is only a zone carried objects touch (SceneEvent.Contact); the cursor passes through it.",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The collider is only a zone carried objects touch (SceneEvent.Contact); the cursor passes through it."
+        },
+        "pickable": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "false: pure decoration without a hit box; the cursor and carried objects pass through it (a needle, a part drawn on a grabbable parent).",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "false: pure decoration without a hit box; the cursor and carried objects pass through it (a needle, a part drawn on a grabbable parent)."
+        },
+        "tooltip": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Text next to the cursor while it is over the node: a translation key (shown as written when no language has it). Code can change it (NodeView.setTooltip)."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Text next to the cursor while it is over the node: a translation key (shown as written when no language has it). Code can change it (NodeView.setTooltip)."
+        },
+        "grabbable": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/grabbable_partial",
+              "description": "The player can pick the node up and carry it."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The player can pick the node up and carry it."
+        },
+        "slot": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/slot_partial",
+              "description": "The node is a place for the item of a station slot."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The node is a place for the item of a station slot."
+        },
+        "drop_zone": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "A slot group: a stack clicked or let go here goes into that group. The cursor passes through while nothing fits."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A slot group: a stack clicked or let go here goes into that group. The cursor passes through while nothing fits."
+        },
+        "output": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/output_partial",
+              "description": "The node shows a station output; clicking takes it."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The node shows a station output; clicking takes it."
+        },
+        "control": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/control_partial",
+              "description": "The node is a button, toggle, knob or slider driving a station control."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The node is a button, toggle, knob or slider driving a station control."
+        },
+        "tank": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/tank_partial",
+              "description": "Shows a station tank as liquid inside the node; with a spout the node pours. Combines with any role."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Shows a station tank as liquid inside the node; with a spout the node pours. Combines with any role."
+        },
+        "emitter": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/emitter_partial",
+              "description": "Gives off scene particles."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Gives off scene particles."
+        },
+        "light": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/light_partial",
+              "description": "Shines on the objects around it and lights the work surface."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Shines on the objects around it and lights the work surface."
+        },
+        "hidden": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Starts invisible; code can show it (NodeView.setVisible).",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Starts invisible; code can show it (NodeView.setVisible)."
+        },
+        "extra": {
+          "anyOf": [
+            {
+              "type": "object",
+              "description": "Free-form data for the mod's own code (NodeView.extra())."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Free-form data for the mod's own code (NodeView.extra())."
+        },
+        "children": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/node"
+              },
+              "description": "Nodes attached to this one."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Nodes attached to this one."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "visual_partial": {
+      "type": "object",
+      "description": "What a node looks like: exactly one of model, mesh, item, block.",
+      "properties": {
+        "mesh": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/resource_location",
+              "description": "A polygon model, assets/<namespace>/diegesis/meshes/<path>.obj; one unit is one pixel. Needs texture."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A polygon model, assets/<namespace>/diegesis/meshes/<path>.obj; one unit is one pixel. Needs texture."
+        },
+        "texture": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/resource_location",
+              "description": "The mesh's texture, a sprite of the block atlas: mymod:block/chess/king for assets/mymod/textures/block/chess/king.png, or any vanilla block texture."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The mesh's texture, a sprite of the block atlas: mymod:block/chess/king for assets/mymod/textures/block/chess/king.png, or any vanilla block texture."
+        },
+        "model": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/resource_location",
+              "description": "A block model id, e.g. mymod:diegesis/flask for assets/mymod/models/diegesis/flask.json (every model under models/diegesis/ is loaded by itself; others need DiegesisClient.registerModel)."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A block model id, e.g. mymod:diegesis/flask for assets/mymod/models/diegesis/flask.json (every model under models/diegesis/ is loaded by itself; others need DiegesisClient.registerModel)."
+        },
+        "item": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/resource_location",
+              "description": "An item id, drawn like an item frame shows it."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "An item id, drawn like an item frame shows it."
+        },
+        "block": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/block_state",
+              "description": "A block state as in commands: \"minecraft:lever[face=floor,facing=north]\"."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A block state as in commands: \"minecraft:lever[face=floor,facing=north]\"."
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "The point of the model (its own pixels) that sits on the node's position; the default is the centre of the model's bottom.",
+              "default": [
+                8,
+                0,
+                8
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The point of the model (its own pixels) that sits on the node's position; the default is the centre of the model's bottom."
+        },
+        "tint": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "ARGB colour multiplied into the model; alpha below FF makes it see-through.",
+              "default": "#FFFFFFFF"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ARGB colour multiplied into the model; alpha below FF makes it see-through."
+        },
+        "translucent": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "The model has see-through textures (glass): drawn after solid parts, sorted.",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The model has see-through textures (glass): drawn after solid parts, sorted."
+        },
+        "emissive": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Drawn at full brightness.",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Drawn at full brightness."
+        },
+        "double_sided": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Faces are drawn from behind too: the inner walls of an open glass vessel.",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Faces are drawn from behind too: the inner walls of an open glass vessel."
+        },
+        "glass": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "How clear the faces are where they look straight at the camera: they thicken towards a grazing angle, as glass does. 0 draws the texture as it is. Implies translucent.",
+              "default": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How clear the faces are where they look straight at the camera: they thicken towards a grazing angle, as glass does. 0 draws the texture as it is. Implies translucent."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "box_partial": {
+      "type": "object",
+      "description": "An axis-aligned box, pixels.",
+      "properties": {
+        "from": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "One corner."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "One corner."
+        },
+        "to": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "The opposite corner."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The opposite corner."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "grabbable_partial": {
+      "type": "object",
+      "description": "An object the player picks up with the cursor and carries.",
+      "properties": {
+        "lift": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 64,
+              "description": "How high (pixels) the grip is held above the work surface.",
+              "default": 4
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How high (pixels) the grip is held above the work surface."
+        },
+        "sway": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4,
+              "description": "How much it leans while moving; 0 keeps it upright.",
+              "default": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How much it leans while moving; 0 keeps it upright."
+        },
+        "stay": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Stays where it is dropped instead of flying back home.",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Stays where it is dropped instead of flying back home."
+        },
+        "grip": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "The point it is held by, node pixels (a vial by its top); the middle of its hit box by default."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The point it is held by, node pixels (a vial by its top); the middle of its hit box by default."
+        },
+        "plane": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/grab_plane_partial",
+              "description": "A plane of its own it moves in instead of the work surface (lift and carry planes then do not apply)."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A plane of its own it moves in instead of the work surface (lift and carry planes then do not apply)."
+        },
+        "contact": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/box_partial",
+              "description": "The part that touches other things (a torch's flame), node pixels; the whole hit box when absent."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The part that touches other things (a torch's flame), node pixels; the whole hit box when absent."
+        },
+        "hold": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "auto",
+                "drag",
+                "click"
+              ],
+              "description": "auto: a quick click leaves it in the hand until the next click, pressing and dragging carries it until the button is let go; drag or click: only that way.",
+              "default": "auto"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "auto: a quick click leaves it in the hand until the next click, pressing and dragging carries it until the button is let go; drag or click: only that way."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "grab_plane_partial": {
+      "type": "object",
+      "description": "A plane a grabbable moves in; its grip follows the cursor on it.",
+      "properties": {
+        "point": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "A point of the plane, scene pixels."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A point of the plane, scene pixels."
+        },
+        "normal": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "The plane's facing; [0, 0, -1] is an upright wall facing the block's front.",
+              "default": [
+                0,
+                0,
+                -1
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The plane's facing; [0, 0, -1] is an upright wall facing the block's front."
+        },
+        "bounds": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/box_partial",
+              "description": "Where on the plane the grip may go, scene pixels; anywhere when absent."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Where on the plane the grip may go, scene pixels; anywhere when absent."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "carry_plane_partial": {
+      "type": "object",
+      "description": "With a height: a level carried objects rise to over an area (a vial goes up over a tall flask). Closed: an area objects may not enter (a torch stays outside a burner). Where planes overlap the highest wins.",
+      "properties": {
+        "from": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/xz",
+              "description": "One corner of the area, [x, z] scene pixels."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "One corner of the area, [x, z] scene pixels."
+        },
+        "to": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/xz",
+              "description": "The opposite corner."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The opposite corner."
+        },
+        "height": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Height (scene pixels) of the object's grip over the area."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Height (scene pixels) of the object's grip over the area."
+        },
+        "blend": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 64,
+              "description": "Pixels round the area over which objects climb to it (or stay away from a closed one).",
+              "default": 4
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Pixels round the area over which objects climb to it (or stay away from a closed one)."
+        },
+        "closed": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Objects may not enter the area.",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Objects may not enter the area."
+        },
+        "nodes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/node_id"
+              },
+              "description": "The grabbable nodes it applies to; all when empty."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The grabbable nodes it applies to; all when empty."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "slot_partial": {
+      "type": "object",
+      "description": "A place for an item of a station slot; clicked like a vanilla slot.",
+      "properties": {
+        "slot": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z0-9_]+(\\[[0-9]+\\])?$",
+              "description": "The station slot: \"grid[4]\", or \"fuel\" for index 0."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The station slot: \"grid[4]\", or \"fuel\" for index 0."
+        },
+        "display": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "flat",
+                "upright",
+                "floating",
+                "hidden"
+              ],
+              "description": "flat: lying on the surface; upright: standing, facing the camera side; floating: hovering and turning.",
+              "default": "flat"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "flat: lying on the surface; upright: standing, facing the camera side; floating: hovering and turning."
+        },
+        "size": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 64,
+              "description": "Size of the slot (drop zone, highlight) in pixels; also of the item without item_size.",
+              "default": 6
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Size of the slot (drop zone, highlight) in pixels; also of the item without item_size."
+        },
+        "item_size": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 64,
+              "description": "Size of the shown item, when it differs from the slot's."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Size of the shown item, when it differs from the slot's."
+        },
+        "counts": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "always",
+                "hover",
+                "never"
+              ],
+              "description": "When the stack's count is drawn; hover keeps slots close together readable.",
+              "default": "always"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "When the stack's count is drawn; hover keeps slots close together readable."
+        },
+        "highlight": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "The square over the slot under the cursor; off for things that are no slots to the eye.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The square over the slot under the cursor; off for things that are no slots to the eye."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "output_partial": {
+      "type": "object",
+      "description": "Shows a result the station logic computes; clicking takes it.",
+      "properties": {
+        "output": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "The station output's name."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The station output's name."
+        },
+        "display": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "flat",
+                "upright",
+                "floating",
+                "hidden"
+              ],
+              "description": "How the result is shown.",
+              "default": "floating"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How the result is shown."
+        },
+        "size": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 64,
+              "description": "Size of the item and of the click zone, pixels.",
+              "default": 8
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Size of the item and of the click zone, pixels."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "control_partial": {
+      "type": "object",
+      "description": "A control the player operates with the mouse. Knob/toggle turn round axis from range[0] to range[1] degrees; slider/button move along axis by that many pixels. Axis, range and pivot are in the node's own space.",
+      "properties": {
+        "control": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "The station control (declared in the schema)."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The station control (declared in the schema)."
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "button",
+                "toggle",
+                "knob",
+                "slider"
+              ],
+              "description": "button: click, springs back; toggle: click flips 0/1; knob: turned; slider: dragged."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "button: click, springs back; toggle: click flips 0/1; knob: turned; slider: dragged."
+        },
+        "axis": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "Turn axis or travel direction. Defaults: button [0,-1,0], toggle [1,0,0], knob [0,1,0], slider [1,0,0]."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Turn axis or travel direction. Defaults: button [0,-1,0], toggle [1,0,0], knob [0,1,0], slider [1,0,0]."
+        },
+        "range": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "Movement at the minimum and maximum value. Defaults: button [0,1], toggle [-25,25], knob [135,-135], slider [0,8]."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Movement at the minimum and maximum value. Defaults: button [0,1], toggle [-25,25], knob [135,-135], slider [0,8]."
+        },
+        "circular": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "A knob is grabbed anywhere and turned by circling the mouse round it; false turns it by dragging up or right.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A knob is grabbed anywhere and turned by circling the mouse round it; false turns it by dragging up or right."
+        },
+        "pivot": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "The point a knob or toggle turns round, node pixels (a lever's hinge).",
+              "default": [
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The point a knob or toggle turns round, node pixels (a lever's hinge)."
+        },
+        "base": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/visual_partial",
+              "description": "What stays still while the node moves (a lever's plate, a slider's track); drawn where the node rests, not clickable."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "What stays still while the node moves (a lever's plate, a slider's track); drawn where the node rests, not clickable."
+        },
+        "smoothing": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "description": "Seconds the node takes to cover half the way to a new value; larger glides (a gauge needle on a locked control).",
+              "default": 0.05
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Seconds the node takes to cover half the way to a new value; larger glides (a gauge needle on a locked control)."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "tank_partial": {
+      "type": "object",
+      "description": "Shows a station tank as liquid inside the node.",
+      "properties": {
+        "tank": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "The station tank's name."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The station tank's name."
+        },
+        "inner": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/box_partial",
+              "description": "The space the liquid fills, node pixels."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The space the liquid fills, node pixels."
+        },
+        "round": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "The liquid is a cylinder standing in inner instead of a box.",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The liquid is a cylinder standing in inner instead of a box."
+        },
+        "spout": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "Where liquid leaves when poured, node pixels; without one the node only receives."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Where liquid leaves when poured, node pixels; without one the node only receives."
+        },
+        "pour_range": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 64,
+              "description": "How far (pixels) round another tank the cursor still counts as pointing at it.",
+              "default": 2.5
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How far (pixels) round another tank the cursor still counts as pointing at it."
+        },
+        "pour_angle": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 135,
+              "description": "How far (degrees) the node tips at most; it stops earlier once the liquid reaches the spout.",
+              "default": 100
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How far (degrees) the node tips at most; it stops earlier once the liquid reaches the spout."
+        },
+        "opening": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "Where poured liquid goes in, node pixels; the middle of inner's top when absent."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Where poured liquid goes in, node pixels; the middle of inner's top when absent."
+        },
+        "pour_height": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 32,
+              "description": "How high (pixels) over the other tank's opening the spout is held.",
+              "default": 3
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How high (pixels) over the other tank's opening the spout is held."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "emitter_partial": {
+      "type": "object",
+      "description": "Gives off scene particles; code can switch it (NodeView.setEmitting).",
+      "properties": {
+        "particle": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/resource_location",
+              "description": "A particle style: diegesis:spark, bubble, droplet, splash, steam, smoke, glint, dust, flame, or one registered with DiegesisClient.registerParticle."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A particle style: diegesis:spark, bubble, droplet, splash, steam, smoke, glint, dust, flame, or one registered with DiegesisClient.registerParticle."
+        },
+        "rate": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 200,
+              "description": "Particles per second.",
+              "default": 4
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Particles per second."
+        },
+        "offset": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "Where they start, node pixels.",
+              "default": [
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Where they start, node pixels."
+        },
+        "velocity": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "Start velocity, pixels per second; turns with the node.",
+              "default": [
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Start velocity, pixels per second; turns with the node."
+        },
+        "spread": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 64,
+              "description": "Random spread of the start position, pixels.",
+              "default": 0.5
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Random spread of the start position, pixels."
+        },
+        "color": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "ARGB tint; the style's own colour when absent."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ARGB tint; the style's own colour when absent."
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Emits from the start.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Emits from the start."
+        },
+        "scale": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.05,
+              "maximum": 20,
+              "description": "Size factor over the style's size.",
+              "default": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Size factor over the style's size."
+        },
+        "in_liquid": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Start anywhere in the node's liquid and end at its surface (bubbles); offset and spread are then unused.",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Start anywhere in the node's liquid and end at its surface (bubbles); offset and spread are then unused."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "light_partial": {
+      "type": "object",
+      "description": "The node shines on the scene (also while carried).",
+      "properties": {
+        "level": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 15,
+              "description": "Brightness like a block's light.",
+              "default": 14
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Brightness like a block's light."
+        },
+        "radius": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 256,
+              "description": "How far it reaches, pixels.",
+              "default": 16
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How far it reaches, pixels."
+        },
+        "color": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "ARGB colour of the light pool on the surface; alpha is its strength, 0 draws none.",
+              "default": "#80FFD9A0"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ARGB colour of the light pool on the surface; alpha is its strength, 0 draws none."
+        },
+        "flicker": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "How much it wavers: 0 a steady lamp, 1 a wild flame.",
+              "default": 0.12
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How much it wavers: 0 a steady lamp, 1 a wild flame."
+        },
+        "offset": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "Where the light comes from, node pixels (the middle of a long lamp).",
+              "default": [
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Where the light comes from, node pixels (the middle of a long lamp)."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "inventory_partial": {
+      "type": "object",
+      "description": "The player's 36 slots laid out in the scene, vanilla order: hotbar the row nearest the player, slots 9-17 the farthest; column 0 on the player's left.",
+      "properties": {
+        "pos": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "Centre of the slot grid, scene pixels."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Centre of the slot grid, scene pixels."
+        },
+        "rotation": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/vec3",
+              "description": "The grid's turn in degrees (y, x, z); flat without one.",
+              "default": [
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The grid's turn in degrees (y, x, z); flat without one."
+        },
+        "spacing": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 32,
+              "description": "Pixels between slot centres.",
+              "default": 2.6
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Pixels between slot centres."
+        },
+        "size": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 32,
+              "description": "Size of the items, pixels.",
+              "default": 2.1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Size of the items, pixels."
+        },
+        "surface": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/block_state",
+              "description": "A block drawn as a board under the slots; without one they float."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A block drawn as a board under the slots; without one they float."
+        },
+        "slot_color": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "ARGB colour of each slot's square; alpha 0 hides them.",
+              "default": "#66000000"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ARGB colour of each slot's square; alpha 0 hides them."
+        },
+        "show": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "always",
+                "toggle"
+              ],
+              "description": "toggle: hidden until Tab (Tab hides again), shown while an item is on the cursor.",
+              "default": "always"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "toggle: hidden until Tab (Tab hides again), shown while an item is on the cursor."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "inventory_drawer_partial": {
+      "type": "object",
+      "description": "The inventory in a drawer at a side of the screen: an icon sits there, pointing at the side slides the inventory out over the scene, and while it is out it comes first. Every field is optional.",
+      "properties": {
+        "side": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "left",
+                "right",
+                "top",
+                "bottom"
+              ],
+              "description": "The side of the screen.",
+              "default": "right"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The side of the screen."
+        },
+        "align": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Where along that side it sits: 0 at the start (left or top), 1 at the end.",
+              "default": 0.5
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Where along that side it sits: 0 at the start (left or top), 1 at the end."
+        },
+        "icon": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/resource_location",
+              "description": "The item drawn on the icon.",
+              "default": "minecraft:bundle"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The item drawn on the icon."
+        },
+        "icon_texture": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/resource_location",
+              "description": "A 16x16 texture drawn on the icon instead, e.g. mymod:textures/gui/bag.png."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A 16x16 texture drawn on the icon instead, e.g. mymod:textures/gui/bag.png."
+        },
+        "hover_zone": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 64,
+              "description": "How wide (GUI pixels) the strip along the side is that opens it; 0: only the icon does.",
+              "default": 10
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How wide (GUI pixels) the strip along the side is that opens it; 0: only the icon does."
+        },
+        "open_delay": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2,
+              "description": "Seconds the cursor must stay there, so that passing by opens nothing.",
+              "default": 0.08
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Seconds the cursor must stay there, so that passing by opens nothing."
+        },
+        "close_delay": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 5,
+              "description": "Seconds it waits after the cursor left.",
+              "default": 0.35
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Seconds it waits after the cursor left."
+        },
+        "slide_time": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2,
+              "description": "Seconds it takes to slide.",
+              "default": 0.18
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Seconds it takes to slide."
+        },
+        "margin": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 64,
+              "description": "Gap (GUI pixels) between the open drawer and the side of the screen.",
+              "default": 4
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Gap (GUI pixels) between the open drawer and the side of the screen."
+        },
+        "style": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "panel",
+                "minimal"
+              ],
+              "description": "panel: the vanilla inventory panel; minimal: dark see-through squares.",
+              "default": "panel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "panel: the vanilla inventory panel; minimal: dark see-through squares."
+        },
+        "background": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "Background of the minimal style.",
+              "default": "#C0101216"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Background of the minimal style."
+        },
+        "slot_color": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "Colour of a slot in the minimal style.",
+              "default": "#66000000"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Colour of a slot in the minimal style."
+        },
+        "always_open": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "It slides out when the station opens and stays out, without an icon; Escape leaves the station at once.",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "It slides out when the station opens and stays out, without an icon; Escape leaves the station at once."
+        },
+        "compact": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Only the stacks the station can use (StationView.setInventoryFilter), in rows of up to nine, the drawer no bigger than they are.",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Only the stacks the station can use (StationView.setInventoryFilter), in rows of up to nine, the drawer no bigger than they are."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "pouring_partial": {
+      "type": "object",
+      "description": "How pouring looks; every field is optional.",
+      "properties": {
+        "hints": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "While a vessel with liquid is in the hand, tanks that would take it are marked at their openings.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "While a vessel with liquid is in the hand, tanks that would take it are marked at their openings."
+        },
+        "hint_color": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "Colour of those marks.",
+              "default": "#40FFFFFF"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Colour of those marks."
+        },
+        "meter": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "A small bar next to the cursor shows how full the tank being poured into is.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A small bar next to the cursor shows how full the tank being poured into is."
+        },
+        "stream": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "The liquid runs in a continuous stream; false leaves only drops.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The liquid runs in a continuous stream; false leaves only drops."
+        },
+        "stream_width": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.05,
+              "maximum": 8,
+              "description": "How wide (pixels) the stream leaves the spout at full flow.",
+              "default": 1.4
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How wide (pixels) the stream leaves the spout at full flow."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "interface_partial": {
+      "type": "object",
+      "description": "How the interface behaves and looks; every field is optional.",
+      "properties": {
+        "hide_hud": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Hide the HUD (hotbar, health, crosshair).",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Hide the HUD (hotbar, health, crosshair)."
+        },
+        "hide_chat": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Hide the chat.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Hide the chat."
+        },
+        "hide_player": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Do not draw the local player's own body (others still see it).",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Do not draw the local player's own body (others still see it)."
+        },
+        "inventory_panel": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Without an inventory layout, show the vanilla inventory panel (stations with items); false shows no inventory.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Without an inventory layout, show the vanilla inventory panel (stations with items); false shows no inventory."
+        },
+        "show_counts": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Write stack counts next to items in the scene.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Write stack counts next to items in the scene."
+        },
+        "counts_on_top": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Draw counts over everything.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Draw counts over everything."
+        },
+        "highlight_color": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "ARGB colour over the slot under the cursor.",
+              "default": "#4DFFFFFF"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ARGB colour over the slot under the cursor."
+        },
+        "shadows": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Carried things cast a shadow of their shape.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Carried things cast a shadow of their shape."
+        },
+        "shadow_opacity": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "How dark those shadows are.",
+              "default": 0.5
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How dark those shadows are."
+        },
+        "carry_lift": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 32,
+              "description": "How high (pixels) the held stack floats over the work surface.",
+              "default": 2.5
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How high (pixels) the held stack floats over the work surface."
+        },
+        "carry_stick": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "The held stack settles onto the slot under the cursor.",
+              "default": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The held stack settles onto the slot under the cursor."
+        },
+        "carry_sway": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4,
+              "description": "How much the held stack leans as it moves.",
+              "default": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How much the held stack leans as it moves."
+        },
+        "carry_margin": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 256,
+              "description": "How far (pixels) beyond the block's sides carried things may go; no limit when absent."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How far (pixels) beyond the block's sides carried things may go; no limit when absent."
+        },
+        "sounds": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "The library's quiet sounds for picking up, putting down and controls.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The library's quiet sounds for picking up, putting down and controls."
+        },
+        "hover_outline": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Outline the usable object under the cursor.",
+              "default": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Outline the usable object under the cursor."
+        },
+        "outline_color": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color",
+              "description": "Colour of that outline.",
+              "default": "#FFE6E6E6"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Colour of that outline."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false
+    },
+    "node_strict": {
+      "type": "object",
+      "description": "One object of the scene. It has a place, optionally a look, and behaviours. At most one of grabbable, slot, output, control (put others on child nodes). Children move with their parent.",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/node_id",
+          "description": "Unique in the scene; behaviours and code refer to the node by it."
+        },
+        "template": {
+          "$ref": "#/definitions/resource_location",
+          "description": "A node template, assets/<namespace>/diegesis/nodes/<path>.json, whose fields this node starts from: objects merge field by field, null removes a field. Built-in: diegesis:control/lever, switch, button, knob, slider."
+        },
+        "repeat": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "step"
+          ],
+          "properties": {
+            "count": {
+              "$ref": "#/definitions/vec3"
+            },
+            "step": {
+              "$ref": "#/definitions/vec3"
+            }
+          },
+          "description": "The node once per cell of a grid: count [x, y, z] cells, each step [x, y, z] pixels further on, ids <id>_0, <id>_1... (x counts fastest; children get the same ending)."
+        },
+        "pos": {
+          "$ref": "#/definitions/vec3",
+          "description": "Position relative to the parent (or the block corner), pixels.",
+          "default": [
+            0,
+            0,
+            0
+          ]
+        },
+        "rotation": {
+          "$ref": "#/definitions/vec3",
+          "description": "Euler degrees, applied y (yaw), then x (pitch), then z (roll).",
+          "default": [
+            0,
+            0,
+            0
+          ]
+        },
+        "scale": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/vec3"
+            }
+          ],
+          "description": "A factor: one number, or one per axis.",
+          "default": 1
+        },
+        "visual": {
+          "$ref": "#/definitions/visual",
+          "description": "What is drawn; without one the node is an invisible pivot or hit zone."
+        },
+        "collider": {
+          "$ref": "#/definitions/box",
+          "description": "What the cursor can hit, in the node's own pixels; derived from the visual (or the role) when absent. Give plane-made vanilla blocks (torches, plants) an explicit one."
+        },
+        "strokes": {
+          "type": "boolean",
+          "description": "A press on the node starts a stroke: SceneEvent.Stroke every frame until the button is let go. Role-less nodes only.",
+          "default": false
+        },
+        "precise": {
+          "type": "boolean",
+          "description": "A mesh visual is hit only where its polygons are, not anywhere in the collider.",
+          "default": false
+        },
+        "trigger": {
+          "type": "boolean",
+          "description": "The collider is only a zone carried objects touch (SceneEvent.Contact); the cursor passes through it.",
+          "default": false
+        },
+        "pickable": {
+          "type": "boolean",
+          "description": "false: pure decoration without a hit box; the cursor and carried objects pass through it (a needle, a part drawn on a grabbable parent).",
+          "default": true
+        },
+        "tooltip": {
+          "type": "string",
+          "description": "Text next to the cursor while it is over the node: a translation key (shown as written when no language has it). Code can change it (NodeView.setTooltip)."
+        },
+        "grabbable": {
+          "$ref": "#/definitions/grabbable",
+          "description": "The player can pick the node up and carry it."
+        },
+        "slot": {
+          "$ref": "#/definitions/slot",
+          "description": "The node is a place for the item of a station slot."
+        },
+        "drop_zone": {
+          "type": "string",
+          "description": "A slot group: a stack clicked or let go here goes into that group. The cursor passes through while nothing fits."
+        },
+        "output": {
+          "$ref": "#/definitions/output",
+          "description": "The node shows a station output; clicking takes it."
+        },
+        "control": {
+          "$ref": "#/definitions/control",
+          "description": "The node is a button, toggle, knob or slider driving a station control."
+        },
+        "tank": {
+          "$ref": "#/definitions/tank",
+          "description": "Shows a station tank as liquid inside the node; with a spout the node pours. Combines with any role."
+        },
+        "emitter": {
+          "$ref": "#/definitions/emitter",
+          "description": "Gives off scene particles."
+        },
+        "light": {
+          "$ref": "#/definitions/light",
+          "description": "Shines on the objects around it and lights the work surface."
+        },
+        "hidden": {
+          "type": "boolean",
+          "description": "Starts invisible; code can show it (NodeView.setVisible).",
+          "default": false
+        },
+        "extra": {
+          "type": "object",
+          "description": "Free-form data for the mod's own code (NodeView.extra())."
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/node"
+          },
+          "description": "Nodes attached to this one."
+        }
+      },
+      "patternProperties": {
+        "^\\$": {}
+      },
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "grabbable",
+              "slot"
+            ]
+          },
+          {
+            "required": [
+              "grabbable",
+              "output"
+            ]
+          },
+          {
+            "required": [
+              "grabbable",
+              "control"
+            ]
+          },
+          {
+            "required": [
+              "slot",
+              "output"
+            ]
+          },
+          {
+            "required": [
+              "slot",
+              "control"
+            ]
+          },
+          {
+            "required": [
+              "output",
+              "control"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "visual": {"model": "diegesis:diegesis/control/slider"},
+  "control": {
+    "type": "slider",
+    "axis": [-1, 0, 0],
+    "range": [-4, 4],
+    "base": {"model": "diegesis:diegesis/control/slider_base"}
+  }
+}

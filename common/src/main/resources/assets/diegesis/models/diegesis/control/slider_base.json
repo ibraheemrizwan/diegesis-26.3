@@ -1,0 +1,284 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/anvil",
+    "anvil": "minecraft:block/anvil",
+    "iron_block": "minecraft:block/iron_block"
+  },
+  "elements": [
+    {
+      "name": "base_track",
+      "from": [
+        1,
+        0,
+        6
+      ],
+      "to": [
+        15,
+        1,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1,
+            15,
+            15,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "east": {
+          "uv": [
+            6,
+            15,
+            10,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "south": {
+          "uv": [
+            1,
+            15,
+            15,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "west": {
+          "uv": [
+            6,
+            15,
+            10,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "up": {
+          "uv": [
+            1,
+            6,
+            15,
+            10
+          ],
+          "texture": "#anvil"
+        },
+        "down": {
+          "uv": [
+            1,
+            6,
+            15,
+            10
+          ],
+          "texture": "#anvil",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "name": "base_rail_n",
+      "from": [
+        1,
+        1,
+        6
+      ],
+      "to": [
+        15,
+        2,
+        7
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1,
+            14,
+            15,
+            15
+          ],
+          "texture": "#iron_block"
+        },
+        "east": {
+          "uv": [
+            9,
+            14,
+            10,
+            15
+          ],
+          "texture": "#iron_block"
+        },
+        "south": {
+          "uv": [
+            1,
+            14,
+            15,
+            15
+          ],
+          "texture": "#iron_block"
+        },
+        "west": {
+          "uv": [
+            6,
+            14,
+            7,
+            15
+          ],
+          "texture": "#iron_block"
+        },
+        "up": {
+          "uv": [
+            1,
+            6,
+            15,
+            7
+          ],
+          "texture": "#iron_block"
+        }
+      }
+    },
+    {
+      "name": "base_rail_s",
+      "from": [
+        1,
+        1,
+        9
+      ],
+      "to": [
+        15,
+        2,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1,
+            14,
+            15,
+            15
+          ],
+          "texture": "#iron_block"
+        },
+        "east": {
+          "uv": [
+            6,
+            14,
+            7,
+            15
+          ],
+          "texture": "#iron_block"
+        },
+        "south": {
+          "uv": [
+            1,
+            14,
+            15,
+            15
+          ],
+          "texture": "#iron_block"
+        },
+        "west": {
+          "uv": [
+            9,
+            14,
+            10,
+            15
+          ],
+          "texture": "#iron_block"
+        },
+        "up": {
+          "uv": [
+            1,
+            9,
+            15,
+            10
+          ],
+          "texture": "#iron_block"
+        }
+      }
+    },
+    {
+      "name": "base_stop_w",
+      "from": [
+        1,
+        1,
+        7
+      ],
+      "to": [
+        2,
+        2,
+        9
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            7,
+            14,
+            9,
+            15
+          ],
+          "texture": "#anvil"
+        },
+        "west": {
+          "uv": [
+            7,
+            14,
+            9,
+            15
+          ],
+          "texture": "#anvil"
+        },
+        "up": {
+          "uv": [
+            1,
+            7,
+            2,
+            9
+          ],
+          "texture": "#anvil"
+        }
+      }
+    },
+    {
+      "name": "base_stop_e",
+      "from": [
+        14,
+        1,
+        7
+      ],
+      "to": [
+        15,
+        2,
+        9
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            7,
+            14,
+            9,
+            15
+          ],
+          "texture": "#anvil"
+        },
+        "west": {
+          "uv": [
+            7,
+            14,
+            9,
+            15
+          ],
+          "texture": "#anvil"
+        },
+        "up": {
+          "uv": [
+            14,
+            7,
+            15,
+            9
+          ],
+          "texture": "#anvil"
+        }
+      }
+    }
+  ]
+}

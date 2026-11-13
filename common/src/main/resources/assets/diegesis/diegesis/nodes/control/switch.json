@@ -1,0 +1,10 @@
+{
+  "visual": {"model": "diegesis:diegesis/control/switch"},
+  "control": {
+    "type": "toggle",
+    "axis": [1, 0, 0],
+    "range": [-12, 12],
+    "pivot": [0, 2, 0],
+    "base": {"model": "diegesis:diegesis/control/switch_base"}
+  }
+}

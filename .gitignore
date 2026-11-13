@@ -1,0 +1,13 @@
+.gradle/
+build/
+run*/
+.idea/
+.vscode/
+*.log
+*.hprof
+hs_err_pid*
+.env
+.env.*
+local.properties
+Thumbs.db
+.DS_Store

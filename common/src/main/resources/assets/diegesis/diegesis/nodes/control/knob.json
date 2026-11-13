@@ -1,0 +1,9 @@
+{
+  "visual": {"model": "diegesis:diegesis/control/knob"},
+  "control": {
+    "type": "knob",
+    "axis": [0, 1, 0],
+    "range": [135, -135],
+    "base": {"model": "diegesis:diegesis/control/knob_base"}
+  }
+}

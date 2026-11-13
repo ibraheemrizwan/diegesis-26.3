@@ -1,0 +1,10 @@
+{
+  "visual": {"model": "diegesis:diegesis/control/lever"},
+  "control": {
+    "type": "toggle",
+    "axis": [1, 0, 0],
+    "range": [-30, 30],
+    "pivot": [0, 3.5, 0],
+    "base": {"model": "diegesis:diegesis/control/lever_base"}
+  }
+}

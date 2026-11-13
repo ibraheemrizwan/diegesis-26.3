@@ -1,0 +1,199 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/anvil",
+    "anvil": "minecraft:block/anvil",
+    "red_concrete": "minecraft:block/red_concrete"
+  },
+  "elements": [
+    {
+      "name": "move_stem",
+      "from": [
+        7,
+        1,
+        7
+      ],
+      "to": [
+        9,
+        2,
+        9
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            7,
+            14,
+            9,
+            15
+          ],
+          "texture": "#anvil"
+        },
+        "east": {
+          "uv": [
+            7,
+            14,
+            9,
+            15
+          ],
+          "texture": "#anvil"
+        },
+        "south": {
+          "uv": [
+            7,
+            14,
+            9,
+            15
+          ],
+          "texture": "#anvil"
+        },
+        "west": {
+          "uv": [
+            7,
+            14,
+            9,
+            15
+          ],
+          "texture": "#anvil"
+        },
+        "down": {
+          "uv": [
+            7,
+            7,
+            9,
+            9
+          ],
+          "texture": "#anvil"
+        }
+      }
+    },
+    {
+      "name": "move_grip",
+      "from": [
+        6,
+        2,
+        5
+      ],
+      "to": [
+        10,
+        4,
+        11
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            12,
+            10,
+            14
+          ],
+          "texture": "#red_concrete"
+        },
+        "east": {
+          "uv": [
+            5,
+            12,
+            11,
+            14
+          ],
+          "texture": "#red_concrete"
+        },
+        "south": {
+          "uv": [
+            6,
+            12,
+            10,
+            14
+          ],
+          "texture": "#red_concrete"
+        },
+        "west": {
+          "uv": [
+            5,
+            12,
+            11,
+            14
+          ],
+          "texture": "#red_concrete"
+        },
+        "up": {
+          "uv": [
+            6,
+            5,
+            10,
+            11
+          ],
+          "texture": "#red_concrete"
+        },
+        "down": {
+          "uv": [
+            6,
+            5,
+            10,
+            11
+          ],
+          "texture": "#red_concrete"
+        }
+      }
+    },
+    {
+      "name": "move_ridge",
+      "from": [
+        7,
+        4,
+        5
+      ],
+      "to": [
+        9,
+        5,
+        11
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            7,
+            11,
+            9,
+            12
+          ],
+          "texture": "#red_concrete"
+        },
+        "east": {
+          "uv": [
+            5,
+            11,
+            11,
+            12
+          ],
+          "texture": "#red_concrete"
+        },
+        "south": {
+          "uv": [
+            7,
+            11,
+            9,
+            12
+          ],
+          "texture": "#red_concrete"
+        },
+        "west": {
+          "uv": [
+            5,
+            11,
+            11,
+            12
+          ],
+          "texture": "#red_concrete"
+        },
+        "up": {
+          "uv": [
+            7,
+            5,
+            9,
+            11
+          ],
+          "texture": "#red_concrete"
+        }
+      }
+    }
+  ]
+}

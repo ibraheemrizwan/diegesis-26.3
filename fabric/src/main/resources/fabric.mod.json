@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "diegesis",
+  "version": "1.0.0-beta.4+26.3.port.1",
+  "name": "Diegesis",
+  "description": "Library for in-world block interfaces: the camera moves to the block and players work with its 3D parts directly, without a GUI.",
+  "authors": [
+    "Pocky"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Pocky-l/diegesis",
+    "sources": "https://github.com/Pocky-l/diegesis",
+    "issues": "https://github.com/Pocky-l/diegesis/issues"
+  },
+  "license": "MIT",
+  "icon": "logo.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.pockyl.diegesis.fabric.DiegesisFabric"
+    ],
+    "client": [
+      "com.pockyl.diegesis.fabric.DiegesisFabricClient"
+    ],
+    "fabric-client-gametest": [
+      "com.pockyl.diegesis.gametest.ClientPortTest"
+    ],
+    "fabric-gametest": [
+      "com.pockyl.diegesis.gametest.ModGameTests"
+    ]
+  },
+  "mixins": [
+    "diegesis.mixins.json",
+    "diegesis.fabric.mixins.json"
+  ],
+  "accessWidener": "diegesis.accesswidener",
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "fabric-api": ">=0.161.0+26.3",
+    "minecraft": "26.3",
+    "java": ">=25"
+  }
+}

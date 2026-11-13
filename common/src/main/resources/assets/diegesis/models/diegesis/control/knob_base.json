@@ -1,0 +1,202 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/anvil",
+    "anvil": "minecraft:block/anvil",
+    "dial": "diegesis:block/control/dial"
+  },
+  "elements": [
+    {
+      "name": "base_dial_z",
+      "from": [
+        4,
+        0,
+        3
+      ],
+      "to": [
+        12,
+        1,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            4,
+            15,
+            12,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "east": {
+          "uv": [
+            3,
+            15,
+            13,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "south": {
+          "uv": [
+            4,
+            15,
+            12,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "west": {
+          "uv": [
+            3,
+            15,
+            13,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "up": {
+          "uv": [
+            4,
+            3,
+            12,
+            13
+          ],
+          "texture": "#dial"
+        },
+        "down": {
+          "uv": [
+            4,
+            3,
+            12,
+            13
+          ],
+          "texture": "#anvil",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "name": "base_dial_x_w",
+      "from": [
+        3,
+        0,
+        4
+      ],
+      "to": [
+        4,
+        1,
+        12
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            15,
+            13,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "south": {
+          "uv": [
+            3,
+            15,
+            4,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "west": {
+          "uv": [
+            4,
+            15,
+            12,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "up": {
+          "uv": [
+            3,
+            4,
+            4,
+            12
+          ],
+          "texture": "#dial"
+        },
+        "down": {
+          "uv": [
+            3,
+            4,
+            4,
+            12
+          ],
+          "texture": "#anvil",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "name": "base_dial_x_e",
+      "from": [
+        12,
+        0,
+        4
+      ],
+      "to": [
+        13,
+        1,
+        12
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            3,
+            15,
+            4,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "east": {
+          "uv": [
+            4,
+            15,
+            12,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "south": {
+          "uv": [
+            12,
+            15,
+            13,
+            16
+          ],
+          "texture": "#anvil"
+        },
+        "up": {
+          "uv": [
+            12,
+            4,
+            13,
+            12
+          ],
+          "texture": "#dial"
+        },
+        "down": {
+          "uv": [
+            12,
+            4,
+            13,
+            12
+          ],
+          "texture": "#anvil",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

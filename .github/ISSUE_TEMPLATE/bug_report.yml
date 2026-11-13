@@ -1,0 +1,20 @@
+name: Port bug report
+description: Report a problem with this Minecraft 26.3 Fabric port.
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Port version and Fabric Loader version
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: What happened, and how can it be reproduced?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log excerpt or crash report link
+      description: Remove account tokens, private addresses and other sensitive information.

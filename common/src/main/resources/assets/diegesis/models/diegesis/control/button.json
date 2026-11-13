@@ -1,0 +1,138 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/red_concrete",
+    "red_concrete": "minecraft:block/red_concrete"
+  },
+  "elements": [
+    {
+      "name": "move_cap",
+      "from": [
+        6,
+        1,
+        6
+      ],
+      "to": [
+        10,
+        4,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            12,
+            10,
+            15
+          ],
+          "texture": "#red_concrete"
+        },
+        "east": {
+          "uv": [
+            6,
+            12,
+            10,
+            15
+          ],
+          "texture": "#red_concrete"
+        },
+        "south": {
+          "uv": [
+            6,
+            12,
+            10,
+            15
+          ],
+          "texture": "#red_concrete"
+        },
+        "west": {
+          "uv": [
+            6,
+            12,
+            10,
+            15
+          ],
+          "texture": "#red_concrete"
+        },
+        "up": {
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ],
+          "texture": "#red_concrete"
+        },
+        "down": {
+          "uv": [
+            6,
+            6,
+            10,
+            10
+          ],
+          "texture": "#red_concrete"
+        }
+      }
+    },
+    {
+      "name": "move_dome",
+      "from": [
+        7,
+        4,
+        7
+      ],
+      "to": [
+        9,
+        5,
+        9
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            7,
+            11,
+            9,
+            12
+          ],
+          "texture": "#red_concrete"
+        },
+        "east": {
+          "uv": [
+            7,
+            11,
+            9,
+            12
+          ],
+          "texture": "#red_concrete"
+        },
+        "south": {
+          "uv": [
+            7,
+            11,
+            9,
+            12
+          ],
+          "texture": "#red_concrete"
+        },
+        "west": {
+          "uv": [
+            7,
+            11,
+            9,
+            12
+          ],
+          "texture": "#red_concrete"
+        },
+        "up": {
+          "uv": [
+            7,
+            7,
+            9,
+            9
+          ],
+          "texture": "#red_concrete"
+        }
+      }
+    }
+  ]
+}

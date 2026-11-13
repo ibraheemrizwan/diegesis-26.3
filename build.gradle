@@ -1,0 +1,44 @@
+plugins { id 'net.fabricmc.fabric-loom' version '1.17.21' }
+group = 'com.pockyl'
+java { toolchain.languageVersion = JavaLanguageVersion.of(25); withSourcesJar() }
+repositories {
+    mavenCentral()
+    maven { url = 'https://api.modrinth.com/maven' }
+    maven { url = 'https://maven.blamejared.com/' }
+    maven { url = 'https://maven.shedaniel.me/' }
+    maven { url = 'https://maven.architectury.dev/' }
+}
+dependencies {
+    minecraft 'com.mojang:minecraft:26.3'
+    implementation 'net.fabricmc:fabric-loader:0.19.5'
+    implementation 'net.fabricmc.fabric-api:fabric-api:0.161.0+26.3'
+}
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+    options.encoding = 'UTF-8'
+}
+tasks.named('jar') { from('LICENSE'); from('NOTICE.md') }
+
+version = '1.0.0-beta.4+26.3.port.1'
+base { archivesName = 'diegesis-fabric-26.3' }
+sourceSets.main {
+    java.setSrcDirs(['common/src/main/java', 'fabric/src/main/java'])
+    resources.setSrcDirs(['common/src/main/resources', 'fabric/src/main/resources'])
+}
+loom { accessWidenerPath = file('fabric/src/main/resources/diegesis.accesswidener') }
+
+dependencies { compileOnly 'net.fabricmc.fabric-api:fabric-client-gametest-api-v1:6.0.7+4be74c3f5d' }
+loom { runs { clientTest {
+    client()
+    runDir 'run-clienttest'
+    vmArg '-Dfabric.client.gametest'
+    vmArg '-Dfabric.client.gametest.modid=diegesis'
+} } }
+
+loom { runs { gameTestServer {
+    server()
+    runDir 'run-gametest'
+    vmArg '-Dfabric-api.gametest'
+    vmArg '-Dfabric-api.gametest.filter=diegesis:*'
+    vmArg '-Dfabric-api.gametest.report-file=build/gametest-results.xml'
+} } }

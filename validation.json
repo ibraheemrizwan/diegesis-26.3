@@ -1,0 +1,11 @@
+{
+  "minecraft": "26.3",
+  "loader": "0.19.5",
+  "fabric_api": "0.161.0+26.3",
+  "java": 25,
+  "server_tests": 23,
+  "suite_server_tests": 136,
+  "release": "1.0.0-beta.4+26.3.port.1",
+  "artifact": "diegesis-fabric-26.3-1.0.0-beta.4+26.3.port.1.jar",
+  "sha256": "ddfdc9a0c8868167e4646e1752501ebfabe13accd36cf666a116e6deed289e1e"
+}
